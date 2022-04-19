@@ -16,3 +16,4 @@ for index, col in qualify.iterrows():
     qualify.loc[index,'Brake'] = session.car_data[driver_num]['Brake'].mean()
     
 qualify.to_csv('Relevant_Qualifying.csv')
+
