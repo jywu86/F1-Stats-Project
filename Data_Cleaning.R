@@ -19,19 +19,19 @@ time_convert <- function(qual_time){
 # assigning as fastest qualifying
 qualify$Fastest_Qual_Secs <- unlist(map(qualify$Fastest_Qual, time_convert))
 
-
 # finding relevant circuits
-race_id <- unique(data.frame(races$circuitId))
-colnames(race_id) <- c('circuitId')
+race_id <- data.frame(races$circuitId, races$raceId)
+colnames(race_id) <- c('circuitId','raceId')
+race_id <- race_id[!duplicated(race_id[,c('circuitId')]),]
 circuit <- circuit %>% inner_join(race_id, by='circuitId')
 
-# merge with circuit and raceId
-race_circuit_id <- circuit %>% select(raceId,circuitId)
+# merge with qualify with circuit_Id
+race_circuit_id <- races %>% select(raceId,circuitId)  # creates a df with race_id and circuit_id to merge with qualify
 qualify <- merge(x=qualify, y=race_circuit_id, on ='raceId', how='left')
 
 # finding year for qualify
 qual_2018 <- qualify %>% filter(year == 2018)
-qual_2019 <- qualify %>% filter(year == 2019)
+qual_2019 <- qualify %>% filter(year == 2019) # 2019 is used because of the lack of rain and amount of races
 qual_2020 <- qualify %>% filter(year == 2020)
 qual_2021 <- qualify %>% filter(year == 2021)
 
@@ -40,10 +40,15 @@ rainfall_2019 <- qual_2019 %>% group_by(Rainfall) %>% summarise(n())
 rainfall_2020 <- qual_2020 %>% group_by(Rainfall) %>% summarise(n())
 rainfall_2021 <- qual_2021 %>% group_by(Rainfall) %>% summarise(n())
 
-# 2019 will be used as there are very little rain races and had a large amount of races compared to 2020
+# adding average speed for each circuit
 track_time <- qual_2019 %>% group_by(circuitId) %>% summarise(mean(Fastest_Qual_Secs))
 circuit <- merge(x=circuit, y=track_time, on='circuitId',how='left') # this adds average lap time to circuit
 circuit <- rename(circuit,  'Lap_time' = 'mean(Fastest_Qual_Secs)')
 circuit$speedmph <- (circuit$dist.mile./circuit$Lap_time)*3600
+
+# adding telemetry throttle for each circuit
+tele_data <- qual_2019 %>% group_by(circuitId) %>% summarise(mean(Throttle))
+
+# outputting Circuit Information
 
 
