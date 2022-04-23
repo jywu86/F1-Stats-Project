@@ -1,6 +1,6 @@
 ---
 title: "F1 Project (E109"
-author: "John Wu and Scott Smith"
+author: "John Wu and Scotty Smith"
 date: "4/22/2022"
 output: html_document
 ---
