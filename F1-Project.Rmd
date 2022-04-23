@@ -1,0 +1,44 @@
+---
+title: "F1 Project (E109"
+author: "John Wu and Scott Smith"
+date: "4/22/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Background and Purpose
+
+The purpose of this project is to use machine learning to understand the effect of individual drivers and their relative value.  Unlike the world of basketball, football, or soccer, there is no even playing field in the world of Formula 1.  The car and team is at many times much more critical than any given driver for ultimate performance.  Lewis Hamilton is a 7 time world champion and has dominated this decade in this sport.  Sebastian Vettel is the only other 5 time world champion that is currently driving.  The thing they all have in common is that they all did it in one or two cars.  
+
+When looking at salaries between the drivers, Lewis Hamilton currently is said to make 40 million dollars per year meanwhile a relative promising rookie named Yuki Tsunoda is making approximately 700 thousand dollars per year.  For the big teams with large budgets, it is nnot unfeasible to pay that kind of money.  However, many people say the Formula 1 is actually 3 different leagues in one.  The top teams, Mercedes, Ferrari, Red Bull all pay high prices and have large teams in the thousands to support every small function.  Towards the back of the grid, you will find teams such as Williams, Haas, and Aston Martin where it may be critical to find the best value at any given opportunity.  
+
+Our goal with this project is to determine how much does a driver matter on a team and is there a much larger gain to be had by just investing in the driver.  
+
+## The Data
+
+The data used for this project was a mixture of a public dataset from Kaggle (https://www.kaggle.com/datasets/rohanrao/formula-1-world-championship-1950-2020) with further enrichment from a package FastF1 (https://theoehrly.github.io/Fast-F1/).
+
+The inital dataset did not include weather and telemetry (e.g. full throttle, braking) data which was later enriched through our script in "Data_Enchancements.py".  
+
+## The Methods
+
+
+
+
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
