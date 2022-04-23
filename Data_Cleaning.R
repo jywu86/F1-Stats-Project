@@ -43,12 +43,16 @@ rainfall_2021 <- qual_2021 %>% group_by(Rainfall) %>% summarise(n())
 # adding average speed for each circuit
 track_time <- qual_2019 %>% group_by(circuitId) %>% summarise(mean(Fastest_Qual_Secs))
 circuit <- merge(x=circuit, y=track_time, on='circuitId',how='left') # this adds average lap time to circuit
-circuit <- rename(circuit,  'Lap_time' = 'mean(Fastest_Qual_Secs)')
-circuit$speedmph <- (circuit$dist.mile./circuit$Lap_time)*3600
+circuit <- rename(circuit,  'Avg_Speed' = 'mean(Fastest_Qual_Secs)')
+circuit$Avg_Speed_MPH <- (circuit$dist.mile./circuit$Avg_Speed)*3600
 
 # adding telemetry throttle for each circuit
 tele_data <- qual_2019 %>% group_by(circuitId) %>% summarise(mean(Throttle))
+circuit <- merge(x=circuit, y=tele_data, on='circuitId',how='left') # this adds average throttle to circuit
+circuit <- rename(circuit,  'Avg_Throttle' = 'mean(Throttle)')
 
 # outputting Circuit Information
+write.csv(circuit,'Relevant_Circuits.csv')
 
-
+avg_speed <- as.vector(circuit$Avg_Speed_MPH)
+hist(avg_speed)
