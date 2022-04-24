@@ -2,8 +2,6 @@
 .Rhistory
 .RData
 .Ruserdata
-
-
 # ignore F1-Cache
-
 F1-Cache/
+Relevant_Circuits.csv
