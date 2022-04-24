@@ -29,7 +29,14 @@ The inital dataset did not include weather and telemetry (e.g. full throttle, br
 - Classifying tracks based on average speed
 - Clean up data with only dry and find average speed for that track across all 4 years.  
 - Remove bottom quartile of qualifying. 
-- After removing rain, if there are any tracks that do not have 2 races in the 4 years.  
+- After removing rain, if there are any tracks that do not have 2 races in the 4 years.
+```{r , echo=FALSE}
+circuit <- read_csv("Circuits_AVG_Top10Dry.csv")
+avg_speed <- as.vector(circuit$Avg_Speed_MPH)
+hist(avg_speed,breaks = 80)
+
+```
+
 
 
 # John
