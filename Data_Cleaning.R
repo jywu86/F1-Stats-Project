@@ -53,4 +53,4 @@ write.csv(circuit,'Circuits_AVG_Top10Dry.csv')
 write.csv(qualify_dry_top10, 'Relevant_Qualify_DRY_Top10.csv')
 
 avg_speed <- as.vector(circuit$Avg_Speed_MPH)
-hist(avg_speed)
+hist(avg_speed,breaks = 40)
