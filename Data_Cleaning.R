@@ -54,3 +54,7 @@ write.csv(qualify_dry_top10, 'Relevant_Qualify_DRY_Top10.csv')
 
 avg_speed <- as.vector(circuit$Avg_Speed_MPH)
 hist(avg_speed,breaks = 40)
+
+Final %>% group_by(driverId) %>% summarise(n = n()) %>% arrange(desc(n))
+Drivers <- Relevant_Qualifying %>% group_by(driverId) %>% summarise(n = n()) %>% arrange(desc(n))
+print(tibble::as_tibble(Drivers),n=30)
