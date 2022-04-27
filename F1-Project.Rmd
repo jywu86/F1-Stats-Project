@@ -9,27 +9,66 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Background and Purpose
+# Background and Purpose
 
-The purpose of this project is to use machine learning to understand the effect of individual drivers and their relative value.  Unlike the world of basketball, football, or soccer, there is no even playing field in the world of Formula 1.  The car and team is at many times much more critical than any given driver for ultimate performance.  Lewis Hamilton is a 7 time world champion and has dominated this decade in this sport.  Sebastian Vettel is the only other 5 time world champion that is currently driving.  The thing they all have in common is that they all did it in one or two cars.  
+The purpose of this project is to use machine learning to understand the effect of individual drivers and their relative value.  In the world of Formula 1 the performance of an individual depends on both the maximum performance of the car and the maximum performance of a driver.  The driver salary can range anywhere between 700k to 40 million dollars per year.  
 
-When looking at salaries between the drivers, Lewis Hamilton currently is said to make 40 million dollars per year meanwhile a relative promising rookie named Yuki Tsunoda is making approximately 700 thousand dollars per year.  For the big teams with large budgets, it is nnot unfeasible to pay that kind of money.  However, many people say the Formula 1 is actually 3 different leagues in one.  The top teams, Mercedes, Ferrari, Red Bull all pay high prices and have large teams in the thousands to support every small function.  Towards the back of the grid, you will find teams such as Williams, Haas, and Aston Martin where it may be critical to find the best value at any given opportunity.  
+This project goal is to find out if there is a large discernible difference between the drivers and if you were to manage an F1 team with limited budget constraints, what kind of strategy would be ideal. 
 
-Our goal with this project is to determine how much does a driver matter on a team and is there a much larger gain to be had by just investing in the driver.  
-
-## The Data
+# The Data and Wrangling (and a little bit of background)
 
 The data used for this project was a mixture of a public dataset from Kaggle (https://www.kaggle.com/datasets/rohanrao/formula-1-world-championship-1950-2020) with further enrichment from a package FastF1 (https://theoehrly.github.io/Fast-F1/).
+
+This data was broken down into multiple sheets with cross referenced ids and had data available for races from 1950 to 2020.  The sheets are broken down into mainly two types of sheets: reference sheets and result sheets.  We will be using result type of sheets to build our models.  
+
+### Race Weekend
+A typical Formula 1 race weekend consists of 3 types of days: practice, qualify, and race.  Practice data is not captured in this dataset and are excluded.  Qualify is the portion of the weekend where drivers and teams put on their fastest set-up for the track and try to set the fastest lap.  The quickest cars get to start at the front of the grid on race day.  The race day is the main event where drivers line up in the order they qualified on and execute on a given strategy.  Each team is allowed to have 2 drivers in similar vehicles and the race is on. 
+
+### Types of Tracks
+Unlike basketball, football, or more traditional sports; track differences tend to favor certain types of cars more favorably than others.  For example Monza circuit (shown below) is known to be one of the fastest circuits with an average speed of 162 mph and a distance of 3.6 miles per lap.  These types of tracks favor teams with powerful engines and lower drag.   
+
+![Monza Race Track in Italy.]images/monza_circuit.jpg
+
+In contrast there are tracks such as Monaco, where the average speed is 104 and a distance of 2 miles per lap as well as tight 90 degree corners.  Cars that perform favorably in these conditions are usually shorter, higher, and more nimble.  
+
+![Monaco Street Track in Italy.]images/monaco_circuit.jpg
+
+A breakdown of the average speed for 30 tracks:
+```{r , echo=FALSE}
+library(tidyverse)
+circuit <- read_csv("Circuits_AVG_Top10Dry.csv")
+circuit %>% 
+  ggplot(aes(x=Avg_Speed_MPH)) + geom_histogram(fill = 'red')
+```
+
+
+
+
+# Data Filtering
+Formula 1 is broken down into separate eras of similar cars based on their technology.  We would like to compare as simlar cars as possible so the era chosen was the most recent era called the "Turbo-Hybrid" era which comes from the use of a hybrid engine along with turbos and stems from 2014 to 2020.  
+
+The dataset is broken up into qualifying.csv - this outlines all the times and laps set in 
 
 The inital dataset did not include weather and telemetry (e.g. full throttle, braking) data which was later enriched through our script in "Data_Enchancements.py".  
 
 ## Data Preparation
 
+
+
+
+
 # Scotty portion
 - Classifying tracks based on average speed
 - Clean up data with only dry and find average speed for that track across all 4 years.  
 - Remove bottom quartile of qualifying. 
-- After removing rain, if there are any tracks that do not have 2 races in the 4 years.  
+- After removing rain, if there are any tracks that do not have 2 races in the 4 years.
+```{r , echo=FALSE}
+#circuit <- read_csv("Circuits_AVG_Top10Dry.csv")
+#avg_speed <- as.vector(circuit$Avg_Speed_MPH)
+#hist(avg_speed,breaks = 80)
+
+```
+
 
 
 # John
