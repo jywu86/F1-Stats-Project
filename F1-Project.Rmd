@@ -31,16 +31,20 @@ Unlike basketball, football, or more traditional sports; track differences tend 
 
 In contrast there are tracks such as Monaco, where the average speed is 104 and a distance of 2 miles per lap as well as tight 90 degree corners.  Cars that perform favorably in these conditions are usually shorter, higher, and more nimble.  
 
+
 ![Monaco Street Track in Italy.]images/monaco_circuit.jpg
 
-A breakdown of the average speed for 30 tracks:
+To categorize these tracks, the average speed for all qualifying laps from 2018 to 2021 was used.  
+
+A breakdown of these speeds is shown below.  We can clearly see that Monaco and Monza are the slowest and fastest tracks per average speed on this distribution. 
 ```{r , echo=FALSE}
 library(tidyverse)
 circuit <- read_csv("Circuits_AVG_Top10Dry.csv")
+circuit <- transform(circuit, track_group = ifelse(Avg_Speed_MPH<120, 'Low_Speed',ifelse(Avg_Speed_MPH<150, 'Med_Speed','High_Speed')))
 circuit %>% 
-  ggplot(aes(x=Avg_Speed_MPH)) + geom_histogram(fill = 'red')
+  ggplot(aes(x=Avg_Speed_MPH, color=track_group)) + geom_histogram(binwidth=2) + facet_grid()
 ```
-
+To simply our split, we split the tracks above an average speed of 140 mph to be high speed tracks and everything below to be low speed tracks. 
 
 
 
