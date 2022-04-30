@@ -6,7 +6,7 @@ results <- read.csv('Raw_Data/results.csv')
 races <- read.csv('Old_Transformation/Relevant_Races.csv')
 driver_id <- read.csv('Raw_Data/drivers.csv')
 circuits <- read.csv('Old_Transformation/Relevant_Circuits_Final.csv')
-qualify <- read.csv('Raw_Data/qualifying.csv')
+qualify <- read.csv('Raw_Data/qualifying2.csv')
 team_id <- read.csv('Raw_Data/constructors.csv')
 r_qualify <- read.csv('Old_Transformation/Relevant_Qualify_2.csv')
 r_qualify <- select(r_qualify, -X.1, -X) # removing X.1 and X columns
@@ -97,10 +97,22 @@ final_results2$Rainfall2[final_results2$Rainfall != 'Dry'] <- 'Wet'
 final_results2$Rainfall2[final_results2$Rainfall == 'Dry'] <- 'Dry'
 
 # Creating only modeling data
-modeling_results <- subset(final_results2, select = -c(circuitId,constructorId,
-                                               driverId,number,
+modeling_results <- subset(final_results2, select = -c(circuitId,constructorId
+                                               ,number,
                                                position,positionText,
                                                positionOrder,time, Rainfall))
+
+qualify <- qualify[,c('raceId','driverId','Column2','Column3')]
+names(qualify)[3] <- 'qualifying_mil'
+names(qualify)[4] <- 'qualifying_dif'
+qualify
+
+final_results2 <- merge(x=final_results2,y=qualify,by=c('raceId','driverId'))
+modeling_results <- merge(x=modeling_results,y=qualify,by=c('raceId','driverId'))
+
+final_results2 <- final_results2 %>% arrange(raceId)
+modeling_results <- modeling_results %>% arrange(raceId)
+nrow(final_results2)
 
 
 write.csv(final_results2,'Modeling_Data_Full.csv', row.names=FALSE)
