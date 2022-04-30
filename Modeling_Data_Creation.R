@@ -2,20 +2,19 @@ library(dplyr)
 library(tidyverse)
 
 # Reading in data
-results <- read.csv('results.csv')
-races <- read.csv('Relevant_Races.csv')
-driver_id <- read.csv('drivers.csv')
-circuits <- read.csv('Relevant_Circuits_Final.csv')
-qualify <- read.csv('qualifying.csv')
-team_id <- read.csv('constructors.csv')
-r_qualify <- read.csv('Relevant_Qualify_2.csv')
+results <- read.csv('Raw_Data/results.csv')
+races <- read.csv('Old_Transformation/Relevant_Races.csv')
+driver_id <- read.csv('Raw_Data/drivers.csv')
+circuits <- read.csv('Old_Transformation/Relevant_Circuits_Final.csv')
+qualify <- read.csv('Raw_Data/qualifying.csv')
+team_id <- read.csv('Raw_Data/constructors.csv')
+r_qualify <- read.csv('Old_Transformation/Relevant_Qualify_2.csv')
 r_qualify <- select(r_qualify, -X.1, -X) # removing X.1 and X columns
 
 # Removing columns from results that are not needed
 results <- results[,c('resultId','raceId','driverId',
                       'constructorId','number','grid',
                       'position','positionText','positionOrder','time')]
-
 
 
 # Merging data and combining columns 
