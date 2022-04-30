@@ -32,22 +32,29 @@ circuits <- transform(circuits, track_group = ifelse(Avg_Speed_MPH<127.6, 'Low_S
 speed_cols <- circuits[,c('circuitId','track_group')]
 final_results <- merge(x=final_results, y=speed_cols, by='circuitId',all.x=TRUE)
 
+r_qualify
+r_qualify2 <- r_qualify[c("raceId","driverId","Fastest_Qual")] 
+r_qualify2
 # Filtering out only relevant qualifying data
 qualify_filter <- r_qualify %>% distinct(raceId)
+qualify_filter
+final_results
 final_results <- merge(x=final_results, y = qualify_filter, by.x='raceId',all.y=TRUE)
-
+final_results
 # Removing results where people DQ'ed or Retired
 final_results <- filter(final_results, positionText != 'R')
-
+final_results2 <- merge(x=final_results,y=r_qualify2,by=c("raceId","driverId"))
+final_results2
 # Finding Top 10 drivers
-driver_group <- final_results %>% group_by(driverId) %>% summarise(n=n()) %>%  arrange(desc(n))
+driver_group <- final_results2 %>% group_by(driverId) %>% summarise(n=n()) %>%  arrange(desc(n))
 driver_group <- merge(x=driver_group, y= driver_id, by='driverId',all.x=TRUE)
 driver_group <- driver_group %>% arrange(desc(driver_group$n))
 
 # Filtering by Top 10 Drivers (with most races) and merging with Driver Names
 affected_drivers <- driver_group[1:10,c('driverId','driverRef')] # filtering top 10 drivers
-final_results <- merge(x=final_results, y=affected_drivers, by='driverId',all.y=TRUE) # filtering out only results with top 8 drivers
+final_results2 <- merge(x=final_results2, y=affected_drivers, by='driverId',all.y=TRUE) # filtering out only results with top 8 drivers
 
+final_results2
 # Creating points system for positions 1-22 (Maybe not needed)
 #points_model <- c(22,21,20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1)
 #positionOrder <- c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22)
@@ -65,36 +72,36 @@ race_rank <- team_rank %>%
 
 race_rank <- race_rank[,c('team_rank','raceId','constructorId')]
 
-final_results <- merge(x=final_results,y=race_rank, by=c('constructorId','raceId'),all.x=TRUE)
+final_results2 <- merge(x=final_results2,y=race_rank, by=c('constructorId','raceId'),all.x=TRUE)
 
-final_results <- final_results %>% 
+final_results2 <- final_results2 %>% 
   arrange(raceId, constructorId, team_rank) %>% 
   group_by(raceId) %>% 
   mutate(team_rank = rank(team_rank, ties.method='min'))
 
-final_results$position <- as.numeric(final_results$position)
+final_results2$position <- as.numeric(final_results2$position)
 
-final_results <- final_results %>% 
+final_results2 <- final_results2 %>% 
   arrange(raceId, driverId,position) %>% 
   group_by(raceId) %>% 
   mutate(final_position = rank(position, ties.method='min'))
 
 # Adding team name
-final_results <- merge(x=final_results, y=team_id[,c('constructorId','constructorRef')], by='constructorId',all.x=TRUE)
+final_results2 <- merge(x=final_results2, y=team_id[,c('constructorId','constructorRef')], by='constructorId',all.x=TRUE)
 
 # Adding track name
-final_results <- merge(x=final_results, y=circuits[,c('circuitId','circuitRef')], by='circuitId',all.x=TRUE)
+final_results2 <- merge(x=final_results2, y=circuits[,c('circuitId','circuitRef')], by='circuitId',all.x=TRUE)
 
 # Converting Dry and Wet to bimodal
-final_results$Rainfall2[final_results$Rainfall != 'Dry'] <- 'Wet'
-final_results$Rainfall2[final_results$Rainfall == 'Dry'] <- 'Dry'
+final_results2$Rainfall2[final_results2$Rainfall != 'Dry'] <- 'Wet'
+final_results2$Rainfall2[final_results2$Rainfall == 'Dry'] <- 'Dry'
 
 # Creating only modeling data
-modeling_results <- subset(final_results, select = -c(circuitId,constructorId,
+modeling_results <- subset(final_results2, select = -c(circuitId,constructorId,
                                                driverId,number,
                                                position,positionText,
                                                positionOrder,time, Rainfall))
 
 
-write.csv(final_results,'Modeling_Data_Full.csv', row.names=FALSE)
+write.csv(final_results2,'Modeling_Data_Full.csv', row.names=FALSE)
 write.csv(modeling_results, 'Modeling_Only.csv', row.names=FALSE)
