@@ -38,21 +38,7 @@ To categorize these tracks, the average speed for all qualifying laps from 2018 
 
 A breakdown of these speeds is shown below.  We can clearly see that Monaco and Monza are the slowest and fastest tracks per average speed on this distribution. 
 ```{r , echo=FALSE}
-library(tidyverse)
-circuit <- read_csv("Circuits_AVG_Top10Dry.csv")
-circuit <- transform(circuit, track_group = ifelse(Avg_Speed_MPH<127.6, 'Low_Speed',ifelse(Avg_Speed_MPH<152.4, 'Med_Speed','High_Speed')))
 
-bw = 1
-n_obs = sum(!is.na(circuit$Avg_Speed_MPH))
-
-mean(circuit$Avg_Speed_MPH)
-sd(circuit$Avg_Speed_MPH)
-
-circuit %>% 
-  ggplot(aes(x=Avg_Speed_MPH, color=track_group)) + 
-  geom_histogram(binwidth=1) + 
-  stat_function(fun=function(x) dnorm(x, mean=mean(circuit$Avg_Speed_MPH), sd = sd(circuit$Avg_Speed_MPH))* bw * n_obs)
-  
 ```
 To simply our split, we split the tracks above an average speed of 140 mph to be high speed tracks and everything below to be low speed tracks. 
 
