@@ -7,6 +7,7 @@ races <- read.csv('Relevant_Races.csv')
 driver_id <- read.csv('drivers.csv')
 circuits <- read.csv('Relevant_Circuits_Final.csv')
 qualify <- read.csv('qualifying.csv')
+team_id <- read.csv('constructors.csv')
 r_qualify <- read.csv('Relevant_Qualify_2.csv')
 r_qualify <- select(r_qualify, -X.1, -X) # removing X.1 and X columns
 
@@ -44,8 +45,8 @@ driver_group <- final_results %>% group_by(driverId) %>% summarise(n=n()) %>%  a
 driver_group <- merge(x=driver_group, y= driver_id, by='driverId',all.x=TRUE)
 driver_group <- driver_group %>% arrange(desc(driver_group$n))
 
-# Filtering by Top 8 Drivers (with most races) and merging with Driver Names
-affected_drivers <- driver_group[1:10,c('driverId','driverRef')] # filtering top 8 drivers
+# Filtering by Top 10 Drivers (with most races) and merging with Driver Names
+affected_drivers <- driver_group[1:10,c('driverId','driverRef')] # filtering top 10 drivers
 final_results <- merge(x=final_results, y=affected_drivers, by='driverId',all.y=TRUE) # filtering out only results with top 8 drivers
 
 # Creating points system for positions 1-22 (Maybe not needed)
@@ -79,4 +80,22 @@ final_results <- final_results %>%
   group_by(raceId) %>% 
   mutate(final_position = rank(position, ties.method='min'))
 
-write.csv(final_results,'Modeling_Data.csv', row.names=FALSE)
+# Adding team name
+final_results <- merge(x=final_results, y=team_id[,c('constructorId','constructorRef')], by='constructorId',all.x=TRUE)
+
+# Adding track name
+final_results <- merge(x=final_results, y=circuits[,c('circuitId','circuitRef')], by='circuitId',all.x=TRUE)
+
+# Converting Dry and Wet to bimodal
+final_results$Rainfall2[final_results$Rainfall != 'Dry'] <- 'Wet'
+final_results$Rainfall2[final_results$Rainfall == 'Dry'] <- 'Dry'
+
+# Creating only modeling data
+modeling_results <- subset(final_results, select = -c(circuitId,constructorId,
+                                               driverId,number,
+                                               position,positionText,
+                                               positionOrder,time, Rainfall))
+
+
+write.csv(final_results,'Modeling_Data_Full.csv', row.names=FALSE)
+write.csv(modeling_results, 'Modeling_Only.csv', row.names=FALSE)
