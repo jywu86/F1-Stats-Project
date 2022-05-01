@@ -97,15 +97,15 @@ forest2 <- train(finish_tier ~.,
                  importance=TRUE)
 
 
-forest2predict <- predict(forest1,test)
+forest2predict <- predict(forest2,test)
 
 confusionMatrix(forest2predict, test$finish_tier)
 
 # 4th model using tier with forest (60 -Train, 40-Test) #### THIS ONE HAS the 75% I'm seeing in the test results
 set.seed(24)
-ind <- sample(2, nrow(model_data), replace=T, prob=c(0.6,0.4))
-train <- model_data[ind==1,]
-test <- model_data[ind==2,]
+ind <- sample(2, nrow(model_data1b), replace=T, prob=c(0.6,0.4))
+train <- model_data1b[ind==1,]
+test <- model_data1b[ind==2,]
 
 cvcontrol <- trainControl(method ='repeatedcv',
                           number =5,
@@ -119,12 +119,36 @@ forest3 <- train(finish_tier ~.,
                  importance=TRUE,ntree=400)
 
 
-forest3predict <- predict(forest1,test)
+forest3predict <- predict(forest3,test)
 
 confusionMatrix(forest3predict, test$finish_tier)
 
 plot(varImp(forest3))
 
+
+#5 using grid as numeric
+set.seed(24)
+ind <- sample(2, nrow(model_data), replace=T, prob=c(0.6,0.4))
+train <- model_data[ind==1,]
+test <- model_data[ind==2,]
+
+cvcontrol <- trainControl(method ='repeatedcv',
+                          number =5,
+                          repeats=2,
+                          allowParallel = TRUE)
+
+forest4 <- train(finish_tier ~.,
+                 data=train,
+                 method='rf',
+                 trControl = cvcontrol,
+                 importance=TRUE,ntree=400)
+
+
+forest4predict <- predict(forest4,test)
+
+confusionMatrix(forest4predict, test$finish_tier)
+
+plot(varImp(forest4))
 
 # 3rd model using tier with xgBoost
 set.seed(24)
@@ -142,9 +166,9 @@ boost1 <- train(finish_tier ~.,
                 method='xgbTree',
                 trControl = cvcontrol,
                 tuneGrid = expand.grid(nrounds = 1000,
-                                       max_depth =4,
-                                       eta = 0.1,
-                                       gamma = 0,
+                                       max_depth =5,
+                                       eta = 0.05,
+                                       gamma = 2,
                                        colsample_bytree =1,
                                        min_child_weight = 1,
                                        subsample =1 ))
@@ -201,9 +225,9 @@ plot(forest2apredict ~ test$final_position)
 
 plot(varImp(forest2a))
 
+forest3
 
-
-########### CLASSIFYING WINNER/LOSER ######################################################################
+##################################### CLASSIFYING WINNER/LOSER ######################################################################
 #  model 3 data set (Classifying winner)
 model_data3 <- subset(mydata, select = -c(final_position,position,constructorRef,finish_tier))
 str(model_data)
@@ -234,3 +258,6 @@ bag3predict <- predict(bag3,test)
 confusionMatrix(bag3predict, test$win, positive='Win')
 
 plot(varImp(bag1))
+
+
+
