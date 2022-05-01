@@ -106,3 +106,16 @@ modeling_results <- subset(final_results2, select = -c(circuitId,constructorId,
 
 #write.csv(final_results2,'Modeling_Data_Full.csv', row.names=FALSE)
 write.csv(modeling_results, 'Modeling_Only.csv', row.names=FALSE)
+
+
+#adding distance/#turns
+
+
+circuits <- read.csv("Raw_Data/circuits.csv")
+ModelData <- read.csv("Modeling_Data_Full.csv")
+
+circuits_year <- read.csv("Raw_Data/circuits_year.csv")
+circuits_year <- circuits_year[,c('circuitId','Turns','Sharp.Turns','year','dist_s_turns','dist.mi','dist_turns','turns_s_mile','turns_mile','Type')]
+ModelData <- merge(ModelData,circuits_year,by=c('circuitId','year'))
+ModelData
+write.csv(ModelData,'Model_Data_w_Turns.csv',row.names=FALSE)
