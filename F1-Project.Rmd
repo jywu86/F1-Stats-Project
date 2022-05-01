@@ -55,13 +55,6 @@ The inital dataset did not include weather and telemetry (e.g. full throttle, br
 
 
 
-
-
-# Scotty portion
-- Classifying tracks based on average speed
-- Clean up data with only dry and find average speed for that track across all 4 years.  
-- Remove bottom quartile of qualifying. 
-- After removing rain, if there are any tracks that do not have 2 races in the 4 years.
 ```{r , echo=FALSE}
 #circuit <- read_csv("Circuits_AVG_Top10Dry.csv")
 #avg_speed <- as.vector(circuit$Avg_Speed_MPH)
@@ -71,34 +64,6 @@ The inital dataset did not include weather and telemetry (e.g. full throttle, br
 
 
 
-# John
-- Add justification in the write-up.  
-- Write up justifications for classification based on distribution.
-- Add classified data to qualifying data to prepare for modeling in qualifying.
-- Prep data for modeling (factoring team/car)
 
 
-# Next week
-- Come up with two models that can be used to predict qualifying
-
-
-
-## The Methods
-
-
-
-
-
-```{r cars}
-summary(cars)
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+## The Methods  (Explain our different models)
