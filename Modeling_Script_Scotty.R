@@ -3,6 +3,9 @@ library(caret)
 library(lime)
 library(tree)
 library(pROC)
+library(ROCR)
+library(car)
+library(MASS)
 
 install.packages(randomForest)
 
@@ -167,38 +170,25 @@ boost3
 
 
 #### Single Drivers
-
-mydata_drivers <- subset(mydata_all, select= c(dist.mi,grid,position,Air.Temp,Track.Temp,Wind.Speed,driverRef,constructorRef,Rainfall2,qualifying_dif,team_rank,dist_turns,dist_s_turns,turns_mile,turns_s_mile,Turns,Sharp.Turns,Type,final_position))
+str(mydata_top5)
+mydata_drivers <- subset(mydata_top5, select= c(finish_tier,dist.mi,grid,position,Air.Temp,Track.Temp,Wind.Speed,driverRef,constructorRef,Rainfall2,qualifying_dif,team_rank,dist_turns,dist_s_turns,turns_mile,turns_s_mile,Turns,Sharp.Turns,Type))
 str(mydata_drivers)
 
-model_data_drivers <- subset(mydata_drivers, select = -c(turns_mile,turns_s_mile,Turns,dist_turns,Sharp.Turns,position,constructorRef))
+model_data_drivers <- subset(mydata_drivers, select = -c(turns_mile,turns_s_mile,Turns,dist_turns,Sharp.Turns,position))
 str(model_data_drivers)
-factor_cols_drivers <- c('Rainfall2','Type')
-model_data_drivers[,factor_cols_drivers] <- lapply(model_data_drivers[,factor_cols_drivers],factor)
+factor_cols_drivers <- c('Rainfall2','Type','driverRef','finish_tier')
+racing_point[,factor_cols_drivers] <- lapply(racing_point[,factor_cols_drivers],factor)
 
 
 model_data_drivers %>% distinct(driverRef)
-hamilton <- model_data_drivers %>% filter(driverRef == 'hamilton')
-hamilton <- subset(hamilton,select = -c(driverRef))
-vettel<- model_data_drivers %>% filter(driverRef == 'vettel')
-vettel <- subset(vettel,select = -c(driverRef))
-raikkonen<- model_data_drivers %>% filter(driverRef == 'raikkonen')
-raikkonen <- subset(raikkonen,select = -c(driverRef))
-perez<- model_data_drivers %>% filter(driverRef == 'perez')
-perez <- subset(perez,select = -c(driverRef))
-bottas<- model_data_drivers %>% filter(driverRef == 'bottas')
-bottas <- subset(bottas,select = -c(driverRef))
-max_verstappen<- model_data_drivers %>% filter(driverRef == 'max_verstappen')
-max_verstappen <- subset(max_verstappen,select = -c(driverRef))
-sainz<- model_data_drivers %>% filter(driverRef == 'sainz')
-sainz <- subset(sainz,select = -c(driverRef))
-stroll<- model_data_drivers %>% filter(driverRef == 'stroll')
-stroll <- subset(stroll,select = -c(driverRef))
-leclerc<- model_data_drivers %>% filter(driverRef == 'leclerc')
-leclerc <- subset(leclerc,select = -c(driverRef))
-gasly<- model_data_drivers %>% filter(driverRef == 'gasly')
-gasly <- subset(gasly,select = -c(driverRef))
-str(vettel)
+mercedes <- model_data_drivers %>% filter(constructorRef == 'meredes')
+mercedes <- subset(mercedes,select = -c(constructorRef))
+racing_point <- model_data_drivers %>% filter(constructorRef == 'racing_point')
+racing_point <- subset(racing_point,select = -c(constructorRef))
+str(racing_point)
+
+
+
 driver_list <- list(hamilton,vettel)
 library(tidyverse)
 pots <- c()
@@ -214,24 +204,36 @@ ploter <- function (driver){
                             repeats=2,
                             allowParallel = TRUE)
   
-  forest4 <- train(final_position ~.,
+  forest4 <- train(finish_tier ~.,
                    data=train2,
                    method='rf',
                    trControl = cvcontrol,
                    importance=TRUE,ntree=400)
-  
+  log <- glm(finish_tier~., data=train2, family='binomial')
+  stepAIC(log)
+  log_predict <- predict(log, test2,type='response')
+  rlog <- multiclass.roc(test2$finish_tier,log_predict, percent=TRUE)
+  roc_log <- rlog[['rocs']]
+  r_log<-roc_log[[1]]
+  #plot.roc(r1, col='red',lwd=3, main= 'ROC Curve for Logistic (Win)')
+  plot.roc(r_log,
+           print.auc = T,
+           auc.polygon = T,
+           max.auc.polygon = T,
+           auc.polygon.col ='lightblue',
+           print.thres = T,
+           main = 'ROC Curve for Logistic (Podium)')
   
   forest4predict <- predict(forest4,test2)
   
-  plot(varImp(forest4))
+  print(plot(varImp(forest4)))
   forest4
-  forest4predict
   
   
   
 }
 par(mfrow=c(2,2))
 
-ploter(hamilton)
+ploter(racing_point)
 ploter(vettel)
 str(hamilton)
