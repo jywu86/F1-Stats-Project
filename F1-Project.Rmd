@@ -19,24 +19,23 @@ The data used for this project was a mixture of a public dataset from Kaggle (<h
 
 This data was broken down into multiple sheets with cross referenced ids and had data available for races from 1950 to 2020. The sheets are broken down into mainly two types of data: reference data and result data. Not all data was used to create the models and a summary of the data used is listed below. Additionally, enhancements to some of the data was used to further enrich additional variables for data modeling.
 
-+----------------+------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------+
-| Dataset Name   | Description                                                                  | Additional Enhancements                                                                    |
-+================+==============================================================================+============================================================================================+
-| qualifying.csv | Summary of qualifying session for each race. Data included all session times | Track Temp, Air Temp, Wind Speed was added via python package FastF1                       |
-+----------------+------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------+
++----------------+------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------+
+| Dataset Name   | Description                                                                  | Additional Enhancements                                                                             |
++================+==============================================================================+=====================================================================================================+
+| qualifying.csv | Summary of qualifying session for each race. Data included all session times | Track Temp, Air Temp, Wind Speed was added via python package FastF1                                |
++----------------+------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------+
 | results.csv    | Summary of race results per driver and team                                  | Air Temp, Track Temp, Wind Speed, Weather, Car Performance Metric, Fastest Lap was found per driver |
-+----------------+------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------+
++----------------+------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------+
 
 ## Data Selection
 
-Formula 1 as a sport has changed drastically over the years and is broken down into separate eras of similar cars based on their technology. We would like to compare as simlar cars as possible so the era chosen was the most recent era called the "Turbo-Hybrid" era which comes from the use of a hybrid engine along with turbos and stems from 2014 to 2021 which is the subset of our analysis.
+Formula 1 as a sport has changed drastically over the years and is broken down into separate eras of similar cars based on their technology. We would like to compare as similar of cars as possible so the era chosen was the most recent era called the "Turbo-Hybrid" era which comes from the use of a hybrid engine along with turbos and occurred between 2014 to 2021 which is the subset of our analysis.
 
-Furthermore, most contracts for drivers range between 1-5 years and many young drivers don't make it past 3-4 years in the sport. We decided to take data from 2018 to 2021 to build our model and make an applicable equivalency to a typical contract year and to keep similar drivers and teams.
+Furthermore, most contracts for drivers range between 1-5 years and many young drivers don't make it past 3-4 years in the sport. We decided to take data from 2018 to 2021 to build our model and make an applicable equivalency to a typical contract length and to keep similar drivers and teams.
 
 #INSERT PARETO OF DRIVERS AND TEAMS
 
-Based on the given dataset, there were 4 explanatory variables available to model our classification models. (grid, circuit, driver, fastest_speed)  Our concern was the lack of variables given to us to produce models.  A large effort was made to create additional variables such as Air.Temp, Track.Temp, Wind.Speed, Weather, Race.Circuit type (street or racing circuit), n_of_Sharp_Turns, car_performance (normalized against the fastest team per race), track_type based on speed, and turns per mile.  
-
+Based on the given dataset, there were 4 explanatory variables available to model our classification models. (grid, circuit, driver, fastest_speed) Our concern was the lack of variables given to us to produce models. A large effort was made to create additional variables such as Air.Temp, Track.Temp, Wind.Speed, Weather, Race.Circuit type (street or racing circuit), n_of_Sharp_Turns, car_performance (normalized against the fastest team per race), track_type based on speed, and turns per mile.
 
 ```{r , echo=FALSE}
 
@@ -63,6 +62,18 @@ The inital dataset did not include weather and telemetry (e.g. full throttle, br
 
 ```
 
-## The Methods (Explain our different models)
+# Purpose 1
 
-We used a series of classification models to predict different tiers of results.
+To understand the differences between top, mid-tier, and backmarkers, we decided to run classification models for 3 different types of race results. In our first analysis, we looked at classification models to predict race wins.
+
+### Race Wins:
+
+To find the best classification model, we decided to run 3 different types of models: logistic regression, random forest, and XgBoost. With a 60/40 split in training to testing across all, we found the following accuracy, specificity, and sensitivity.
+
+| Model Type          | Accuracy | Specificity | Sensitivity |
+|---------------------|----------|-------------|-------------|
+| Logistic Regression |          |             |             |
+| Random Forest       |          |             |             |
+| Gradient Boost      |          |             |             |
+
+With logistic regression, we used the R builtin stepwise function to find the best fitting logistic regression model with the lowest AIC.
