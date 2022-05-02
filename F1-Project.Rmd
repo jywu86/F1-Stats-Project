@@ -5,55 +5,56 @@ date: "4/22/2022"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
 # Background and Purpose
 
-The purpose of this project is to use machine learning to understand the effect of individual drivers and their relative value.  In the world of Formula 1 the performance of an individual depends on both the maximum performance of the car and the maximum performance of a driver.  The driver salary can range anywhere between 700k to 40 million dollars per year.  
+Formula 1 also known as F1 is a series of races (Grand Prix) that take place all across the world including countries from Europe, Asia, North America, and the Middle East. The sport has been around since the early 1950s and is considered as the premier league for open wheel racing. Points are awarded in each race to both the driver and the team that the driver belongs to. Each team is allowed two drivers with closely matched cars and currently (2022) there are 10 teams with 20 drivers in total. Each year two championships are awarded; one for the driver with the most points and the overall team (or constructor).
 
-This project goal is to find out if there is a large discernible difference between the drivers and if you were to manage an F1 team with limited budget constraints, what kind of strategy would be ideal. 
+Historically, F1 has been classified into three main tiers: "Top Teams", "Midfield" (AKA Formula 1.5), and "Backmarkers". A large reason why these top teams remain on top is due to the much larger budgets and can be up to four times the budget of a smaller team. The bulk of these larger teams' budgets is spent in development and can be many years ahead of teams considered in the backmarker. The same can be said for drivers, where the top driver from Mercedes (Lewis Hamilton) makes approximately \$30 million and the best driver from the backmarker team Haas (Mich Schumacher) makes approximately \$1 million. However, in 2020 a budget cap was agreed upon and team budgets are maximized at \$145 million per year. Currently, this does not include driver salaries however it would not be unfathomable to believe a salary cap may also be enforced in the future like many other professional sports.
 
-# The Data and Wrangling (and a little bit of background)
+The purpose of this project is to use classification models to understand the effect of which factors are the most important for top-tier, mid-pack, and back-marker and what would be an ideal strategy for each team aiming to move from each tier. Also to answer the question of how well does each driver reflect their current relative market value.
 
-The data used for this project was a mixture of a public dataset from Kaggle (https://www.kaggle.com/datasets/rohanrao/formula-1-world-championship-1950-2020) with further enrichment from a package FastF1 (https://theoehrly.github.io/Fast-F1/).
+# The Data and Wrangling
 
-This data was broken down into multiple sheets with cross referenced ids and had data available for races from 1950 to 2020.  The sheets are broken down into mainly two types of sheets: reference sheets and result sheets.  We will be using result type of sheets to build our models.  
+The data used for this project was a mixture of a public dataset from Kaggle (<https://www.kaggle.com/datasets/rohanrao/formula-1-world-championship-1950-2020>) with further enrichment from a package FastF1 (<https://theoehrly.github.io/Fast-F1/>).
 
-### Race Weekend
-A typical Formula 1 race weekend consists of 3 types of days: practice, qualify, and race.  Practice data is not captured in this dataset and are excluded.  Qualify is the portion of the weekend where drivers and teams put on their fastest set-up for the track and try to set the fastest lap.  The quickest cars get to start at the front of the grid on race day.  The race day is the main event where drivers line up in the order they qualified on and execute on a given strategy.  Each team is allowed to have 2 drivers in similar vehicles and the race is on. 
+This data was broken down into multiple sheets with cross referenced ids and had data available for races from 1950 to 2020. The sheets are broken down into mainly two types of data: reference data and result data. Not all data was used to create the models and a summary of the data used is listed below. Additionally, enhancements to some of the data was used to further enrich additional variables for data modeling.
 
-### Types of Tracks
-Unlike basketball, football, or more traditional sports; track differences tend to favor certain types of cars more favorably than others.  For example Monza circuit (shown below) is known to be one of the fastest circuits with an average speed of 162 mph and a distance of 3.6 miles per lap.  These types of tracks favor teams with powerful engines and lower drag.   
++----------------+------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------+
+| Dataset Name   | Description                                                                  | Additional Enhancements                                                                    |
++================+==============================================================================+============================================================================================+
+| qualifying.csv | Summary of qualifying session for each race. Data included all session times | Track Temp, Air Temp, Wind Speed was added via python package FastF1                       |
++----------------+------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------+
+| results.csv    | Summary of race results per driver and team                                  | Air Temp, Track Temp, Wind Speed, Weather, Car Performance Metric, Fastest Lap was found per driver |
++----------------+------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------+
 
-![Monza Race Track in Italy.]images/monza_circuit.jpg
+## Data Selection
 
-In contrast there are tracks such as Monaco, where the average speed is 104 and a distance of 2 miles per lap as well as tight 90 degree corners.  Cars that perform favorably in these conditions are usually shorter, higher, and more nimble.  
+Formula 1 as a sport has changed drastically over the years and is broken down into separate eras of similar cars based on their technology. We would like to compare as simlar cars as possible so the era chosen was the most recent era called the "Turbo-Hybrid" era which comes from the use of a hybrid engine along with turbos and stems from 2014 to 2021 which is the subset of our analysis.
+
+Furthermore, most contracts for drivers range between 1-5 years and many young drivers don't make it past 3-4 years in the sport. We decided to take data from 2018 to 2021 to build our model and make an applicable equivalency to a typical contract year and to keep similar drivers and teams.
+
+#INSERT PARETO OF DRIVERS AND TEAMS
+
+Based on the given dataset, there were 4 explanatory variables available to model our classification models. (grid, circuit, driver, fastest_speed)  Our concern was the lack of variables given to us to produce models.  A large effort was made to create additional variables such as Air.Temp, Track.Temp, Wind.Speed, Weather, Race.Circuit type (street or racing circuit), n_of_Sharp_Turns, car_performance (normalized against the fastest team per race), track_type based on speed, and turns per mile.  
 
 
-![Monaco Street Track in Italy.]images/monaco_circuit.jpg
-
-To categorize these tracks, the average speed for all qualifying laps from 2018 to 2021 was used.  
-
-A breakdown of these speeds is shown below.  We can clearly see that Monaco and Monza are the slowest and fastest tracks per average speed on this distribution. 
 ```{r , echo=FALSE}
 
 ```
-To simply our split, we split the tracks above an average speed of 140 mph to be high speed tracks and everything below to be low speed tracks. 
 
+To simply our split, we split the tracks above an average speed of 140 mph to be high speed tracks and everything below to be low speed tracks.
 
+# Data Selection
 
-# Data Filtering
-Formula 1 is broken down into separate eras of similar cars based on their technology.  We would like to compare as simlar cars as possible so the era chosen was the most recent era called the "Turbo-Hybrid" era which comes from the use of a hybrid engine along with turbos and stems from 2014 to 2020.  
+In order to enrich our dataset, we used the ergast API through a package in Python called FastF1 to add additional environmental variables. Through the use of this package, we were able to add the variables, Track Temperature, Air Temperature, Wind Speed, Average Throttle Input (per driver), and Average Brake Input (per driver).
 
-The dataset is broken up into qualifying.csv - this outlines all the times and laps set in 
+Formula 1 is broken down into separate eras of similar cars based on their technology. We would like to compare as similar cars as possible so the era chosen was the most recent era called the "Turbo-Hybrid" era which comes from the use of a hybrid engine along with turbos and stems from 2014 to 2020.
 
-The inital dataset did not include weather and telemetry (e.g. full throttle, braking) data which was later enriched through our script in "Data_Enchancements.py".  
+The dataset is broken up into qualifying.csv - this outlines all the times and laps set in
+
+The inital dataset did not include weather and telemetry (e.g. full throttle, braking) data which was later enriched through our script in "Data_Enchancements.py".
 
 ## Data Preparation
-
-
 
 ```{r , echo=FALSE}
 #circuit <- read_csv("Circuits_AVG_Top10Dry.csv")
@@ -62,8 +63,6 @@ The inital dataset did not include weather and telemetry (e.g. full throttle, br
 
 ```
 
+## The Methods (Explain our different models)
 
-
-
-
-## The Methods  (Explain our different models)
+We used a series of classification models to predict different tiers of results.
