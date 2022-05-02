@@ -21,10 +21,13 @@ The data used for this project was a mixture of a public dataset from Kaggle (<h
 
 This data was broken down into multiple sheets with cross referenced ids and had data available for races from 1950 to 2020. The sheets are broken down into mainly two types of data: reference data and result data. Not all data was used to create the models and a summary of the data used is listed below. Additionally, enhancements to some of the data was used to further enrich additional variables for data modeling.
 
++----------------+------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------+
 | Dataset Name   | Description                                                                  | Additional Enhancements                                                                             |
-|----------------|------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------|
++================+==============================================================================+=====================================================================================================+
 | qualifying.csv | Summary of qualifying session for each race. Data included all session times | Track Temp, Air Temp, Wind Speed was added via python package FastF1                                |
++----------------+------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------+
 | results.csv    | Summary of race results per driver and team                                  | Air Temp, Track Temp, Wind Speed, Weather, Car Performance Metric, Fastest Lap was found per driver |
++----------------+------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------+
 
 ## Data Selection
 
@@ -76,3 +79,11 @@ To find the best classification model, we decided to run 3 different types of mo
 | Gradient Boost      |          |             |             |
 
 With logistic regression, we used the R builtin stepwise function to find the best fitting logistic regression model with the lowest AIC.
+
+# ##INSERT ROC CURVES TO COMPARE FOR BEST MODEL 
+
+# ##INSERT varIMP or Logistic Coefficients to explain Race wins
+
+# ##Do this for Top 3 and Top 5.
+
+# ##CONCLUSION FOR PURPOSE 1: What did we find was critical for winning, did those drivers seem to have an effect?  What about Top 3?  What about Top 5?  
