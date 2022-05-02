@@ -5,6 +5,7 @@ date: "4/22/2022"
 output:
   pdf_document: default
   html_document: default
+  word_document: default
 ---
 
 # Background and Purpose
@@ -21,13 +22,10 @@ The data used for this project was a mixture of a public dataset from Kaggle (<h
 
 This data was broken down into multiple sheets with cross referenced ids and had data available for races from 1950 to 2020. The sheets are broken down into mainly two types of data: reference data and result data. Not all data was used to create the models and a summary of the data used is listed below. Additionally, enhancements to some of the data was used to further enrich additional variables for data modeling.
 
-+----------------+------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------+
-| Dataset Name   | Description                                                                  | Additional Enhancements                                                                             |
-+================+==============================================================================+=====================================================================================================+
-| qualifying.csv | Summary of qualifying session for each race. Data included all session times | Track Temp, Air Temp, Wind Speed was added via python package FastF1                                |
-+----------------+------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------+
-| results.csv    | Summary of race results per driver and team                                  | Air Temp, Track Temp, Wind Speed, Weather, Car Performance Metric, Fastest Lap was found per driver |
-+----------------+------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------+
+| Dataset Name | Description                                                                  | Additional Enhancements                                                                                                  |
+|--------------|------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|
+| qualifying   | Summary of qualifying session for each race. Data included all session times | Track Temp, Air Temp, Wind Speed was added via python package FastF1                                                     |
+| results      | Summary of race results per driver and team                                  | Air Temp, Track Temp, Wind Speed, Weather, Car Performance Metric, Fastest Lap was found per driver, Turns, Sharp Turns, |
 
 ## Data Selection
 
@@ -70,20 +68,133 @@ To understand the differences between top, mid-tier, and backmarkers, we decided
 
 ### Race Wins:
 
-To find the best classification model, we decided to run 3 different types of models: logistic regression, random forest, and XgBoost. With a 60/40 split in training to testing across all, we found the following accuracy, specificity, and sensitivity.
+To find the best classification model, we decided to run 3 different types of models: logistic regression, random forest, and XgBoost. With XgBoost, we tuned our model by looking at a variety of parameters (iterations, tree_depth, learn_rate, and gamma function). ####\# MAYBE NEED TO INSERT ADDITIONAL CHARTS FOR PARAMETER TUNING
 
-| Model Type          | Accuracy | Specificity | Sensitivity |
-|---------------------|----------|-------------|-------------|
-| Logistic Regression |          |             |             |
-| Random Forest       |          |             |             |
-| Gradient Boost      |          |             |             |
+We used ROC curves based on test data to give us an overview with default parameters to find the optimal threshold for each model and looked at the overall accuracy, specificity, and sensitivity (with "Win" as the positive class) for all three models.
 
-With logistic regression, we used the R builtin stepwise function to find the best fitting logistic regression model with the lowest AIC.
+![ROC for Race Win Classification Models](Figures/ROC-Curves_for_Win.jpg){width="7in"}
 
-# ##INSERT ROC CURVES TO COMPARE FOR BEST MODEL 
+Overall, it appears that all models were comparable with the Boost model having a slightly higher AUC. For our analysis, we are primarily interested in the "Win" prediction and what factors are important to achieve this result. Therefore, setting the threshold to 0.1 for both Logistic and Forest models looked to give us the best overall score and highest specificity score and setting the threshold value to 0.05 appeared to be the best threshold for the boost model.
 
-# ##INSERT varIMP or Logistic Coefficients to explain Race wins
+With the following thresholds, we then ran the models with a 60/40 split with cross validation of 5 folds and found the following accuracy, specificity, and sensitivity on the test data.
 
-# ##Do this for Top 3 and Top 5.
++-------------------------------------------+---------------------+-------------------------+--------------------------+
+| Model Type                                | Accuracy            | Sensitivity (Win Class) | Specificity (Lose Class) |
++===========================================+=====================+=========================+==========================+
+| Logistic Regression (Threshold \> 0.1)    | 77.7%               | 91.6%                   | 75.8%                    |
+|                                           |                     |                         |                          |
+|                                           | 95CI (72.6%, 82.3%) |                         |                          |
++-------------------------------------------+---------------------+-------------------------+--------------------------+
+| Random Forest (Threshold \>0.1)           | 79.5%               | 86.1%                   | 78.5%                    |
+|                                           |                     |                         |                          |
+|                                           | 95CI (74.4%, 83.9%) |                         |                          |
++-------------------------------------------+---------------------+-------------------------+--------------------------+
+| Extreme Gradient Boost (Threshold \>0.05) | 75.1%               | 88.9%                   | 73.2%                    |
+|                                           |                     |                         |                          |
+|                                           | 95CI (69.8%, 80.0%) |                         |                          |
++-------------------------------------------+---------------------+-------------------------+--------------------------+
 
-# ##CONCLUSION FOR PURPOSE 1: What did we find was critical for winning, did those drivers seem to have an effect?  What about Top 3?  What about Top 5?  
+: Accuracy Scores for Classification Models (Race Wins)
+
+Comparing across all 3 models, it appears that the Logistic Regression model performed the best when it came to fitting against the Win class and the Random Forest model gave slightly better predictions against the Lose class. All three accuracy scores are within the 95% confidence intervals between each other and therefore the model accurarcies are closely similar.
+
+#### Win Model:
+
+Using the stepAIC function to tune our logistic model revealed that the two variables with the most amount of importance was "Grid" and "driverRef". The sensitivity score from this model was 88.9% and had a specificity score of 74.0%. A breakdown of the following coefficients are shown below:
+
+| Variable                                              | Coefficients |
+|-------------------------------------------------------|--------------|
+| Grid - Order in which drivers line up before the race | -0.417       |
+| Hamilton (Driver)                                     | 2.4107       |
+| Max_Verstappen (Driver)                               | 1.5088       |
+| Vettel (Driver)                                       | 0.5895       |
+| Leclerc (Driver)                                      | 0.3154       |
+| Raikkonen (Driver)                                    | -0.1053      |
+| Perez (Driver)                                        | -0.4409      |
+| Stroll (Driver)                                       | -15.0108     |
+| Sainz (Driver)                                        | -16.0613     |
+| Gasly (Driver)                                        | -16.1000     |
+| Bottas(Driver)                                        | Reference    |
+
+: Logistic Regression (driverRef, grid) Coefficients (Win-Class)
+
+The reference driver used in this model was Bottas and a brief look at these coefficients shows that the top drivers (Hamilton and Verstappen) have an exceedingly high effect on the potential for a race win than compared with the reference driver. Both of these drivers stayed on the same team for all of the four years and were involved in the top team (Mercedes and Red Bull) with the most amount of wins. This model reflects that result heavily.
+
+AWhen looking at the top three drivers (Hamilton, Verstappen, and Vettel) seem to be able to outweigh the negative effect of a one or two bad grid units. Hamilton appears to erase almost 6 grid units and Max with 3 when compared with Bottas.
+
+![Driver Wins from 2018 - 2021](Figures/Driver_Win_Pareto.jpg){width="3in"}
+
+The more interesting points come from drivers such as Raikkonen, Vettel, Leclerc, and Perez (Mid-tier drivers). These drivers have switched teams and moved from top teams to middle/backmarker teams throughout their career. During this period, Leclerc specifically seems to stand out as he secured 2 wins in the 2019 season which is similar to Perez, but has a much larger positive influence on race wins probability. On the opposite spectrum, it appears that Gasly has a much lower influence than his surrounding drivers and significantly lower than Raikkonen, Perez, or Leclerc even though they've had similar number of wins.
+
+A note of reference is that when drivers stay on the same team for all 4 years it is difficult to separate their performance and the performance of the car. One way to compare is to look at drivers and their teammates. The reference driver was Bottas which has also been on the Mercedes team for all 4 years, however when comparing his coefficient; it appears that Hamilton has a significant weight over his teammate when it comes to race wins.
+
+#### Lose Model
+
+To look at the variables that had the most effect on not winning, we chose to use the random forest model based on its relatively high specificity score. When we ran the Random Forest model against the test data, we got a specificity score of 78.6% which was similar to our score when only using the training data. The top variables that aligned with this model were Grid, Driver, Car Performance (qualifying_dif), and Rainfall. With this reduced model, we were able to bring up the specificity score up to 85.4% when running against the test data.
+
+![Variable of Importance (Win)](Figures/Forest_Win_Imp_Tree.jpg){width="3in"}
+
+Our random forest paints a similar picture as it appears Hamilton, Verstappen, and Grid all have some of the highest influences on race wins. A few points are shown that was not seen in the logistic model. Firstly, the grid order seems to have a higher influence than Verstappen's influence and also Verstappen's importance is similar to how much car performance there is. Qualifying_dif is a variable that is calculated by finding the percentage difference between the qualifying times of a team (average of 2 drivers) and the fastest team. (e.g. If a team is slower by 8% per lap, their car performance is 92% the performance of the fastest team). Based on the random forest model, it appears that most environmental variables have more affect on a loss than the majority of drivers.
+
+### Podium Finish (Top 3)
+
+We ran the same analysis for podium finishes with the following model assessments with ROC curves to find the following thresholds. (See Appendix for additional ROC curves)
+
++----------------------------------------+-------+---------------------+----------------------+--------------------------+
+| Model Type                             | AUC   | Accuracy            | Sensitivity (Podium) | Specificity (Not Podium) |
++========================================+=======+=====================+======================+==========================+
+| Logistic Regression (Threshold \> 0.4) | 92.5% | 80.8%               | 93.9%                | 74.2%                    |
+|                                        |       |                     |                      |                          |
+|                                        |       | 95CI (75.9%, 85.1%) |                      |                          |
++----------------------------------------+-------+---------------------+----------------------+--------------------------+
+| Random Forest (Threshold \> 0.4)       | 92.1% | 83.5%               | 87.9%                | 81.3%                    |
+|                                        |       |                     |                      |                          |
+|                                        |       | 95CI (78.8%, 87.5%) |                      |                          |
++----------------------------------------+-------+---------------------+----------------------+--------------------------+
+| Gradient Boost (Threshold \> 0.1)      | 90.2% | 76.7%               | 97.9%                | 66.6%                    |
+|                                        |       |                     |                      |                          |
+|                                        |       | 95CI (71.5%,81.5%)  |                      |                          |
++----------------------------------------+-------+---------------------+----------------------+--------------------------+
+
+Although the Boost model had the highest sensitivity parameter, the accuracy for that model is the weakest out of the 3 with a confidence interval that does not overlap either of the two models. Due to this difference, the two models that will be selected is the Logistic Regression for Sensitivity and Random Forest for Specificity.
+
+#### Scoring Podiums
+
+Once again, we used stepAIC to determine variables that were the most relevant for the logistic model as well as the simplest. The step function reduced the variables to grid, driver, Rainfall, car performance (qualifying_dif), and distance per turn. At optimal threshold, this model increased its accuracy to 83.5% and a sensitivity of 88.9%.
+
+| Variable                         | Coefficient |
+|----------------------------------|-------------|
+| dist_s\_turns                    | 3.9167      |
+| Verstappen (driver)              | 1.5079      |
+| Hamilton (driver)                | 0.8722      |
+| Vettel (driver)                  | -0.3813     |
+| Raikkonen (driver)               | -0.5070     |
+| Sainz (driver)                   | -0.8876     |
+| Leclerc (driver)                 | -0.9698     |
+| Gasly (driver)                   | -1.0414     |
+| Stroll (driver)                  | -1.4145     |
+| Perez (driver)                   | -1.4444     |
+| Rainfall2Wet                     | -1.2820     |
+| grid                             | -0.3583     |
+| qualifying_dif (car performance) | -73.2314    |
+| Bottas                           | Reference   |
+
+: Coefficients of Logistic Model (Podium Finish)
+
+Based on the reduced logistic model, it appears that the car performance has the biggest effect on the chances of getting a podium. There also appears to be some positive weights attached to circuits where the distance per turn is higher; indicating that potentially in higher speed circuits; our reference driver tends to prefer when it comes to achieving podiums.
+
+In the race win model, the largest effects were caused by the two top drivers for the two top teams. There may be some relationship due to the top drivers usually driving the top cars. And there is no surprise that this is also consistent for achieving podiums. However, an interesting point is that in terms of a Hamilton vs Verstappen comparison; it appears that Verstappen may more weight in terms of achieving podiums.
+
+Again, a surprising comparison of drivers is LeClerc and a Sainz which based on the logistic model are extremely similar in weight.
+
+![Total Podiums Achieved (2018-2021)](Figures/Driver_Podium_Pareto.jpg){width="3in"}
+
+This is surprising because of the lack of amount of podiums from Sainz as compared to Leclerc yet while Leclerc was more favorable in terms of winning; in terms of podiums the model views these two drivers as almost equal.
+
+An outcome from our top drivers (Bottas, Hamilton, and Max) shows a clear advantage of Max and Hamilton over Bottas. Although, Max and Bottas have similar counts of podiums, it would appear from the lm model that max has the better of our reference driver Bottas.
+
+#### No Podium Finish:
+
+In terms of specificity, our Random Forest seemed to show the highest specificity and is used to explain the negative class (No Podium). A brief look at the Random Forest Model found the following variables to have high importance: grid, qualifying_dif, and driverRef. Running the model and finding the ROC curve found a threshold of 0.4. The model's overall accuracy was 84.2% and a specificity of 82.8%.
+
+The agreement across both models is that the car performance has a large effect on the winning a podium, whereas the Random Forest model lends a larger importance to grid than compared to the logistic model. When it comes to driver rankings, we are also seeing consistency for Verstappen having a higher influence than Hamilton. The lack of influence from LeClerc is interesting as well seeing that LeClerc scored 5th most podiums compared to the rest of our field.
