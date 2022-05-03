@@ -423,7 +423,7 @@ f_pod_reduced_factor <- as.factor(ifelse(f_pod_reduced_pred$Podium>0.4,"Podium",
 
 confusionMatrix(f_pod_reduced_factor, test_pod$finish_tier, positive='Podium')
 
-plot(varImp(f_pod_reduced), main='Variable Importance for Podium (Forest Model)')
+plot(varImp(f_pod_reduced), main='Variable Importance for Podium (Forest Model)') 
 
 ################################## TOP TEAM (1-6 analysis) #############################################################
 # forest model top3  (60 -Train, 40-Test) .8687
