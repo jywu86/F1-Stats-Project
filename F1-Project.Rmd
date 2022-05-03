@@ -64,7 +64,7 @@ To understand the differences between top, mid-tier, and backmarkers, we decided
 
 ### Race Wins:
 
-To find the best classification model, we decided to run 3 different types of models: logistic regression, random forest, and XgBoost. With XgBoost, we tuned our model by looking at a variety of parameters (iterations, tree_depth, learn_rate, and gamma function). ####\# MAYBE NEED TO INSERT ADDITIONAL CHARTS FOR PARAMETER TUNING
+To find the best classification model, we decided to run 3 different types of models: logistic regression, random forest, and XgBoost. With XgBoost, we tuned our model by looking at a variety of parameters (iterations, tree_depth, learn_rate, and gamma function). \##### MAYBE NEED TO INSERT ADDITIONAL CHARTS FOR PARAMETER TUNING
 
 We used ROC curves based on test data to give us an overview with default parameters to find the optimal threshold for each model and looked at the overall accuracy, specificity, and sensitivity (with "Win" as the positive class) for all three models.
 
@@ -233,8 +233,40 @@ Comparing the 3 models, the logistic regression had the highest AUC and all were
 
 In gradient boost, the top variables were grid, qualifying_dif, Track.Temp, and to a smaller degree drivers. We will use these top variables to build our model and fine tune the specific parameters surrounding XgBoost (rounds, max_depth, learning rate, and gamma loss). We found that with boosting iterations of 1600, the accuracy was the highest; however the first dip in accuracy occurs at a boost iteration of 300.
 
-## ######## THIS PART WILL BE FOR ADDITIONAL ANALYSIS FOR MID-FIELD ANALYSIS###\# 
+## \######## THIS PART WILL BE FOR ADDITIONAL ANALYSIS FOR MID-FIELD ANALYSIS
 
 # CONCLUSION TO PURPOSE 1
 
-# PURPOSE 2 ANALYSIS (Type below this line and I will type above it.  
+# PURPOSE 2 ANALYSIS (Type below this line and I will type above it.
+
+To analyze the variable importance and coefficients found within Teams, which have very similar cars, and for Individuals. In other words... what factors have a higher importance for each team/individual? Is this a positive or negative correlation?
+
+## Method
+
+For each team/individual a random forest model will be used to assess Variable Importance. Secondly, a Logistic Regression model will be used to analyze coefficients. Teams were chosen so that the greatest number of data points were available where both team members remained the same. Individuals were chosen so that the greatest number of data points were available in which the team remained the same. The specific classification group (Win-Loss / Podium - Not / Top 6 - Not) that will be chosen for each team/individual will be based upon the highest Specificity & Sensitivity. We will not be analyzing one team against another, or one individual against another. Instead we will be focusing on the classification that provides the best approach to understanding that specific team/individual in question. For instance... Perez and Stroll do not finish in 1st enough times for the Win-Loss approach to be appropriate. On the other hand, Bottas & Hamilton rarely find themselves outside of the top 3.
+
+## TEAMS
+
++--------------+------------------------+-------------------+-------------+----------------+--------------------------+
+| Team         | Years                  | Individuals       | Sample Size | Classification | AUC (Sens,Spec)          |
++==============+========================+===================+=============+================+==========================+
+| Ferrari      | 2018,2019,2020, & 2021 | Leclerc & Vettel  | 113         | Win            | AUC:83.3%,(63.7%,100%)   |
++--------------+------------------------+-------------------+-------------+----------------+--------------------------+
+| Mercedes     | 2018,2019,2020, & 2021 | Bottas & Hamilton | 160         | Win            | AUC: 84.9%,(79.3%,92.3%) |
++--------------+------------------------+-------------------+-------------+----------------+--------------------------+
+| Racing Point | 2019,2020              | Perez & Stroll    | 63          | Top 6          | AUC: 74.2%,(76.2%,75%)   |
++--------------+------------------------+-------------------+-------------+----------------+--------------------------+
+
+## INDIVIDUALS
+
++----------------+-----------------------+---------------+---------------+
+| Individual     | \| Years              | \| Team       | Sample Size   |
++================+=======================+===============+===============+
+| Bottas         | 2018,2019,2020,& 2021 | Mercedes      | 80            |
++----------------+-----------------------+---------------+---------------+
+| Vettel         | 2018,2019,& 2020      | Ferrari       | 60            |
++----------------+-----------------------+---------------+---------------+
+| Max Verstappen | 2018,2019,2020,& 2021 | Red Bull      | 80            |
++----------------+-----------------------+---------------+---------------+
+| Hamilton       | 2018,2019,2020,& 2021 | Mercedes      | 80            |
++----------------+-----------------------+---------------+---------------+
