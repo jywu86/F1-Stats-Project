@@ -12,9 +12,9 @@ install.packages(randomForest)
 # Importing Data and Prepping it for modeling
 mydata_all <- read.csv('Model_Data_w_Turns.csv')
 str(mydata)
-mydata_win <- subset(mydata_all, select= c(dist.mi,grid,position,Air.Temp,Track.Temp,Wind.Speed,driverRef,constructorRef,Rainfall2,qualifying_dif,team_rank,dist_turns,dist_s_turns,turns_mile,turns_s_mile,Turns,Sharp.Turns,Type))
-mydata_top5 <- subset(mydata_all, select= c(dist.mi,grid,position,Air.Temp,Track.Temp,Wind.Speed,driverRef,constructorRef,Rainfall2,qualifying_dif,team_rank,dist_turns,dist_s_turns,turns_mile,turns_s_mile,Turns,Sharp.Turns,Type))
-mydata_top3 <- subset(mydata_all, select= c(dist.mi,grid,position,Air.Temp,Track.Temp,Wind.Speed,driverRef,constructorRef,Rainfall2,qualifying_dif,team_rank,dist_turns,dist_s_turns,turns_mile,turns_s_mile,Turns,Sharp.Turns,Type))
+mydata_win <- subset(mydata_all, select= c(dist.mi,grid,position,Air.Temp,Track.Temp,Wind.Speed,driverRef,constructorRef,Rainfall2,qualifying_dif,team_rank,dist_turns,dist_s_turns,turns_mile,turns_s_mile,Turns,Sharp.Turns,Type,year))
+mydata_top5 <- subset(mydata_all, select= c(dist.mi,grid,position,Air.Temp,Track.Temp,Wind.Speed,driverRef,constructorRef,Rainfall2,qualifying_dif,team_rank,dist_turns,dist_s_turns,turns_mile,turns_s_mile,Turns,Sharp.Turns,Type,year))
+mydata_top3 <- subset(mydata_all, select= c(dist.mi,grid,position,Air.Temp,Track.Temp,Wind.Speed,driverRef,constructorRef,Rainfall2,qualifying_dif,team_rank,dist_turns,dist_s_turns,turns_mile,turns_s_mile,Turns,Sharp.Turns,Type,year))
 
 mydata_top5$finish_tier[mydata_top5$position<=6] <-'Top6'
 mydata_top5$finish_tier[(mydata_top5$position>6)] <- 'Back_Marker'
@@ -28,8 +28,8 @@ mydata_top3 <- na.omit(mydata_top3)
 mydata_win <- na.omit(mydata_win)
 
 
-mydata_win$win[mydata_win$position ==1] <- 'Win'
-mydata_win$win[mydata_win$position !=1] <- 'Lose'
+mydata_win$finish_tier[mydata_win$position ==1] <- 'Win'
+mydata_win$finish_tier[mydata_win$position !=1] <- 'Lose'
 
 
 #################### Model1 data set (Using Finish_Tier as dependent variable) ###############################
@@ -551,3 +551,259 @@ par(mfrow=c(2,2))
 ploter(hamilton)
 ploter(vettel)
 str(hamilton)
+
+###Purpose 2 Prep
+
+mydata_win <- subset(mydata_win, select= c(dist.mi,grid,position,Air.Temp,Track.Temp,Wind.Speed,driverRef,constructorRef,Rainfall2,qualifying_dif,team_rank,dist_turns,dist_s_turns,turns_mile,turns_s_mile,Turns,Sharp.Turns,Type,finish_tier,year))
+mydata_3 <- subset(mydata_top3, select= c(dist.mi,grid,position,Air.Temp,Track.Temp,Wind.Speed,driverRef,constructorRef,Rainfall2,qualifying_dif,team_rank,dist_turns,dist_s_turns,turns_mile,turns_s_mile,Turns,Sharp.Turns,Type,finish_tier,year))
+mydata_6 <- subset(mydata_top5, select= c(dist.mi,grid,position,Air.Temp,Track.Temp,Wind.Speed,driverRef,constructorRef,Rainfall2,qualifying_dif,team_rank,dist_turns,dist_s_turns,turns_mile,turns_s_mile,Turns,Sharp.Turns,Type,finish_tier,year))
+
+mydata_team_win <- subset(mydata_win, select= c(dist.mi,grid,Air.Temp,Track.Temp,Wind.Speed,driverRef,constructorRef,Rainfall2,qualifying_dif,team_rank,turns_s_mile,Type,finish_tier,year))
+
+
+mydata_team_3 <- subset(mydata_3, select= c(dist.mi,grid,Air.Temp,Track.Temp,Wind.Speed,driverRef,constructorRef,Rainfall2,qualifying_dif,team_rank,turns_s_mile,Type,finish_tier,year))
+
+
+mydata_team_6 <- subset(mydata_6, select= c(dist.mi,grid,Air.Temp,Track.Temp,Wind.Speed,driverRef,constructorRef,Rainfall2,qualifying_dif,team_rank,turns_s_mile,Type,finish_tier,year))
+
+
+mydata_indiv_win <- subset(mydata_win, select= c(dist.mi,grid,Air.Temp,Track.Temp,Wind.Speed,driverRef,constructorRef,Rainfall2,qualifying_dif,team_rank,turns_s_mile,Type,finish_tier,year))
+
+
+mydata_indiv_3 <- subset(mydata_3, select= c(dist.mi,grid,Air.Temp,Track.Temp,Wind.Speed,driverRef,constructorRef,Rainfall2,qualifying_dif,team_rank,turns_s_mile,Type,finish_tier,year))
+
+
+mydata_indiv_6 <- subset(mydata_6, select= c(dist.mi,grid,Air.Temp,Track.Temp,Wind.Speed,driverRef,constructorRef,Rainfall2,qualifying_dif,team_rank,turns_s_mile,Type,finish_tier,year))
+
+
+###Teams
+factor <- function(team) {
+  team$Rainfall2 <- as.factor(team$Rainfall2)
+  team$Type <- as.factor(team$Type)
+  team$finish_tier <- as.factor(team$finish_tier)
+  team$driverRef <- as.factor(team$driverRef)
+  team
+}
+
+factor_teams <- c('Rainfall2','Type','finish_tier','driverRef')
+str(mydata_team_win)
+ferrari_team_win <- mydata_team_win %>% filter(constructorRef == 'ferrari'& (year == 2018 | year == 2019))
+str(ferrari_team_win)
+ferrari_team_win <- subset(ferrari_team_win,select = -c(constructorRef,team_rank,year))
+#ferrari_team_win[,factor_teams] <- lapply(ferrari_team_win[,factor_teams],factor)
+ferrari_team_3 <- mydata_team_3 %>% filter(constructorRef == 'ferrari'& (year == 2018 | year == 2019))
+ferrari_team_3 <- subset(ferrari_team_3,select = -c(constructorRef,team_rank,year))
+#ferrari_team_3[,factor_teams] <- lapply(ferrari_team_3[,factor_teams],factor)
+ferrari_team_6<- mydata_team_6 %>% filter(constructorRef == 'ferrari'& (year == 2018 | year == 2019))
+ferrari_team_6 <- subset(ferrari_team_6,select = -c(constructorRef,team_rank,year))
+#ferrari_team_wi6[,factor_teams] <- lapply(ferrari_team_6[,factor_teams],factor)
+
+mercedes_team_win <- mydata_team_win %>% filter(constructorRef == 'mercedes')
+mercedes_team_win <- subset(mercedes_team_win,select = -c(constructorRef,team_rank,year))
+#mercedes_team_win[,factor_teams] <- lapply(mercedes_team_win[,factor_teams],factor)
+mercedes_team_3<- mydata_team_3 %>% filter(constructorRef == 'mercedes')
+mercedes_team_3 <- subset(mercedes_team_3,select = -c(constructorRef,team_rank,year))
+#mercedes_team_3[,factor_teams] <- lapply(mercedes_team_3[,factor_teams],factor)
+mercedes_team_6<- mydata_team_6 %>% filter(constructorRef == 'mercedes')
+mercedes_team_6 <- subset(mercedes_team_6,select = -c(constructorRef,team_rank,year))
+#mercedes_team_6[,factor_teams] <- lapply(mercedes_team_6[,factor_teams],factor)
+
+racingpoint_team_win <- mydata_team_win %>% filter(constructorRef == 'racing_point'& (year == 2020 | year == 2019))
+racingpoint_team_win <- subset(racingpoint_team_win,select = -c(constructorRef,team_rank,year))
+#racingpoint_team_win[,factor_teams] <- lapply(racingpoint_team_win[,factor_teams],factor)
+racingpoint_team_3 <- mydata_team_3 %>% filter(constructorRef == 'racing_point'& (year == 2020 | year == 2019))
+racingpoint_team_3 <- subset(racingpoint_team_3,select = -c(constructorRef,team_rank,year))
+#racingpoint_team_3[,factor_teams] <- lapply(racingpoint_team_3[,factor_teams],factor)
+racingpoint_team_6 <- mydata_team_6 %>% filter(constructorRef == 'racing_point'& (year == 2020 | year == 2019))
+racingpoint_team_6 <- subset(racingpoint_team_6,select = -c(constructorRef,team_rank,year))
+#racingpoint_team_6[,factor_teams] <- lapply(racingpoint_team_6[,factor_teams],factor)
+
+mercedes_team_win <- factor(mercedes_team_win)
+mercedes_team_3 <- factor(mercedes_team_3)
+mercedes_team_6 <- factor(mercedes_team_6)
+
+ferrari_team_win <- factor(ferrari_team_win)
+ferrari_team_3 <- factor(ferrari_team_3)
+ferrari_team_6 <- factor(ferrari_team_6)
+
+racingpoint_team_win <- factor(racingpoint_team_win)
+racingpoint_team_3 <- factor(racingpoint_team_3)
+racingpoint_team_6 <- factor(racingpoint_team_6)
+str(mercedes_team_win)
+
+set.seed(24)
+ind_f_t_w <- sample(2, nrow(ferrari_team_win), replace=T, prob=c(0.5,0.5))
+train_pod_f_t_w <- ferrari_team_win[ind_f_t_w==1,]
+test_pod_f_t_w <- ferrari_team_win[ind_f_t_w==2,]
+ind_f_t_3 <- sample(2, nrow(ferrari_team_3), replace=T, prob=c(0.5,0.5))
+train_pod_f_t_3 <- ferrari_team_3[ind_f_t_3==1,]
+test_pod_f_t_3 <- ferrari_team_3[ind_f_t_3==2,]
+ind_f_t_6 <- sample(2, nrow(ferrari_team_6), replace=T, prob=c(0.9,0.1))
+train_pod_f_t_6 <- ferrari_team_6[ind_f_t_6==1,]
+test_pod_f_t_6 <- ferrari_team_6[ind_f_t_6==2,]
+
+
+f_m_w <- glm(finish_tier ~grid+Rainfall2+dist.mi+qualifying_dif,family='binomial',data=train_pod_f_t_w)
+f_m_3 <- glm(finish_tier ~Air.Temp+grid,family='binomial',data=train_pod_f_t_3)
+f_m_6 <- glm(finish_tier ~Rainfall2+Track.Temp+driverRef+qualifying_dif+grid+Air.Temp,family='binomial',data=train_pod_f_t_6)
+
+f_m_w_pred <- predict(f_m_w,test_pod_f_t_w,type='response')
+f_m_3_pred <- predict(f_m_3,test_pod_f_t_3,type='response')
+f_m_6_pred <- predict(f_m_6,test_pod_f_t_6,type='response')
+par(mfrow=c(3,1))
+f_m_w <- multiclass.roc(test_pod_f_t_w$finish_tier,f_m_w_pred, percent=TRUE)
+f_m_w  <- f_m_w[['rocs']]
+f_m_w  <-f_m_w[[1]]
+plot.roc(f_m_w,
+         print.auc = T,
+         auc.polygon = T,
+         max.auc.polygon = T,
+         auc.polygon.col ='lightblue',
+         print.thres = T,
+         main = 'ROC Curve for Ferrari Win/Loss')
+f_m_3 <- multiclass.roc(test_pod_f_t_3$finish_tier,f_m_3_pred, percent=TRUE)
+f_m_3  <- f_m_3[['rocs']]
+f_m_3  <-f_m_3[[1]]
+plot.roc(f_m_3,
+         print.auc = T,
+         auc.polygon = T,
+         max.auc.polygon = T,
+         auc.polygon.col ='lightblue',
+         print.thres = T,
+         main = 'ROC Curve for Ferrari Top3')
+f_m_6 <- multiclass.roc(test_pod_f_t_6$finish_tier,f_m_6_pred, percent=TRUE)
+f_m_6  <- f_m_6[['rocs']]
+f_m_6  <-f_m_6[[1]]
+plot.roc(f_m_6,
+         print.auc = T,
+         auc.polygon = T,
+         max.auc.polygon = T,
+         auc.polygon.col ='lightblue',
+         print.thres = T,
+         main = 'ROC Curve for Ferrari Top6')
+
+###########
+set.seed(24)
+ind_m_t_w <- sample(2, nrow(mercedes_team_win), replace=T, prob=c(0.7,0.3))
+train_pod_m_t_w <- mercedes_team_win[ind_m_t_w==1,]
+test_pod_m_t_w <- mercedes_team_win[ind_m_t_w==2,]
+ind_m_t_3 <- sample(2, nrow(mercedes_team_3), replace=T, prob=c(0.7,0.3))
+train_pod_m_t_3 <- mercedes_team_3[ind_m_t_3==1,]
+test_pod_m_t_3 <- mercedes_team_3[ind_m_t_3==2,]
+ind_m_t_6 <- sample(2, nrow(mercedes_team_6), replace=T, prob=c(0.7,0.3))
+train_pod_m_t_6 <- mercedes_team_6[ind_m_t_6==1,]
+test_pod_m_t_6 <- mercedes_team_6[ind_m_t_6==2,]
+
+
+m_m_w <- glm(finish_tier ~.,family='binomial',data=train_pod_m_t_w)
+m_m_3 <- glm(finish_tier ~.,family='binomial',data=train_pod_m_t_3)
+m_m_6 <- glm(finish_tier ~.,family='binomial',data=train_pod_m_t_6)
+
+m_m_w_pred <- predict(m_m_w,test_pod_m_t_w,type='response')
+m_m_3_pred <- predict(m_m_3,test_pod_m_t_3,type='response')
+m_m_6_pred <- predict(m_m_6,test_pod_m_t_6,type='response')
+par(mfrow=c(3,1))
+m_m_w <- multiclass.roc(test_pod_m_t_w$finish_tier,m_m_w_pred, percent=TRUE)
+m_m_w  <- m_m_w[['rocs']]
+m_m_w  <-m_m_w[[1]]
+plot.roc(m_m_w,
+         print.auc = T,
+         auc.polygon = T,
+         max.auc.polygon = T,
+         auc.polygon.col ='lightblue',
+         print.thres = T,
+         main = 'ROC Curve for mercedes Win/Loss')
+m_m_3 <- multiclass.roc(test_pod_m_t_3$finish_tier,m_m_3_pred, percent=TRUE)
+m_m_3  <- m_m_3[['rocs']]
+m_m_3  <-m_m_3[[1]]
+plot.roc(m_m_3,
+         print.auc = T,
+         auc.polygon = T,
+         max.auc.polygon = T,
+         auc.polygon.col ='lightblue',
+         print.thres = T,
+         main = 'ROC Curve for mercedes Top3')
+m_m_6 <- multiclass.roc(test_pod_m_t_6$finish_tier,m_m_6_pred, percent=TRUE)
+m_m_6  <- m_m_6[['rocs']]
+m_m_6  <-m_m_6[[1]]
+plot.roc(m_m_6,
+         print.auc = T,
+         auc.polygon = T,
+         max.auc.polygon = T,
+         auc.polygon.col ='lightblue',
+         print.thres = T,
+         main = 'ROC Curve for Mercedes Top6')
+
+########
+set.seed(24)
+ind_rp_t_w <- sample(2, nrow(racingpoint_team_win), replace=T, prob=c(0.9,0.1))
+train_pod_rp_t_w <- racingpoint_team_win[ind_rp_t_w==1,]
+test_pod_rp_t_w <- racingpoint_team_win[ind_rp_t_w==2,]
+ind_rp_t_3 <- sample(2, nrow(racingpoint_team_3), replace=T, prob=c(0.9,0.1))
+train_pod_rp_t_3 <- racingpoint_team_3[ind_rp_t_3==1,]
+test_pod_rp_t_3 <- racingpoint_team_3[ind_rp_t_3==2,]
+ind_rp_t_6 <- sample(2, nrow(racingpoint_team_6), replace=T, prob=c(0.9,0.1))
+train_pod_rp_t_6 <- racingpoint_team_6[ind_rp_t_6==1,]
+test_pod_rp_t_6 <- racingpoint_team_6[ind_rp_t_6==2,]
+
+
+rp_m_w <- glm(finish_tier ~.,family='binomial',data=train_pod_rp_t_w)
+rp_m_3 <- glm(finish_tier ~.,family='binomial',data=train_pod_rp_t_3)
+rp_m_6 <- glm(finish_tier ~.,family='binomial',data=train_pod_rp_t_6)
+
+rp_m_w_pred <- predict(rp_m_w,test_pod_rp_t_w,type='response')
+rp_m_3_pred <- predict(rp_m_3,test_pod_rp_t_3,type='response')
+rp_m_6_pred <- predict(rp_m_6,test_pod_rp_t_6,type='response')
+par(mfrow=c(3,1))
+rp_m_w <- multiclass.roc(test_pod_rp_t_w$finish_tier,rp_m_w_pred, percent=TRUE)
+rp_m_w  <- rp_m_w[['rocs']]
+rp_m_w  <-rp_m_w[[1]]
+plot.roc(rp_m_w,
+         print.auc = T,
+         auc.polygon = T,
+         max.auc.polygon = T,
+         auc.polygon.col ='lightblue',
+         print.thres = T,
+         main = 'ROC Curve for racingpoint Win/Loss')
+rp_m_3 <- multiclass.roc(test_pod_rp_t_3$finish_tier,rp_m_3_pred, percent=TRUE)
+rp_m_3  <- rp_m_3[['rocs']]
+rp_m_3  <-rp_m_3[[1]]
+plot.roc(rp_m_3,
+         print.auc = T,
+         auc.polygon = T,
+         max.auc.polygon = T,
+         auc.polygon.col ='lightblue',
+         print.thres = T,
+         main = 'ROC Curve for racingpoint Top3')
+rp_m_6 <- multiclass.roc(test_pod_rp_t_6$finish_tier,rp_m_6_pred, percent=TRUE)
+rp_m_6  <- rp_m_6[['rocs']]
+rp_m_6  <-rp_m_6[[1]]
+plot.roc(rp_m_6,
+         print.auc = T,
+         auc.polygon = T,
+         max.auc.polygon = T,
+         auc.polygon.col ='lightblue',
+         print.thres = T,
+         main = 'ROC Curve for racingpoint Top6')
+
+
+###Individuals
+
+hamilton_win
+hamilton_3
+hamilton_6
+
+
+bottas_win
+bottas_3
+bottas_6
+
+
+vettel_win
+vettel_3
+vettel_6
+
+
+verstappen_win
+verstappen_3
+verstappen_6

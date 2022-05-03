@@ -22,13 +22,10 @@ The data used for this project was a mixture of a public dataset from Kaggle (<h
 
 This data was broken down into multiple sheets with cross referenced ids and had data available for races from 1950 to 2020. The sheets are broken down into mainly two types of data: reference data and result data. Not all data was used to create the models and a summary of the data used is listed below. Additionally, enhancements to some of the data was used to further enrich additional variables for data modeling.
 
-+--------------+------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------+
 | Dataset Name | Description                                                                  | Additional Enhancements                                                                                                  |
-+==============+==============================================================================+==========================================================================================================================+
+|--------------|------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|
 | qualifying   | Summary of qualifying session for each race. Data included all session times | Track Temp, Air Temp, Wind Speed was added via python package FastF1                                                     |
-+--------------+------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------+
 | results      | Summary of race results per driver and team                                  | Air Temp, Track Temp, Wind Speed, Weather, Car Performance Metric, Fastest Lap was found per driver, Turns, Sharp Turns, |
-+--------------+------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------+
 
 ## Data Selection
 
@@ -64,7 +61,7 @@ To understand the differences between top, mid-tier, and backmarkers, we decided
 
 ### Race Wins:
 
-To find the best classification model, we decided to run 3 different types of models: logistic regression, random forest, and XgBoost. With XgBoost, we tuned our model by looking at a variety of parameters (iterations, tree_depth, learn_rate, and gamma function). ####\# MAYBE NEED TO INSERT ADDITIONAL CHARTS FOR PARAMETER TUNING
+To find the best classification model, we decided to run 3 different types of models: logistic regression, random forest, and XgBoost. With XgBoost, we tuned our model by looking at a variety of parameters (iterations, tree_depth, learn_rate, and gamma function). \##### MAYBE NEED TO INSERT ADDITIONAL CHARTS FOR PARAMETER TUNING
 
 We used ROC curves based on test data to give us an overview with default parameters to find the optimal threshold for each model and looked at the overall accuracy, specificity, and sensitivity (with "Win" as the positive class) for all three models.
 
@@ -136,21 +133,21 @@ Our random forest paints a similar picture as it appears Hamilton, Verstappen, a
 
 We ran the same analysis for podium finishes with the following model assessments with ROC curves to find the following thresholds. (See Appendix for additional ROC curves)
 
-+----------------------------------------+------------+---------------------+----------------------+--------------------------+
-| Model Type                             | AUC        | Accuracy            | Sensitivity (Podium) | Specificity (Not Podium) |
-+========================================+============+=====================+======================+==========================+
-| Logistic Regression (Threshold \> 0.4) | 92.5%      | 80.8%               | 93.9%                | 74.2%                    |
-|                                        |            |                     |                      |                          |
-|                                        |            | 95CI (75.9%, 85.1%) |                      |                          |
-+----------------------------------------+------------+---------------------+----------------------+--------------------------+
-| Random Forest (Threshold \> 0.4)       | 92.1%      | 83.5%               | 87.9%                | 81.3%                    |
-|                                        |            |                     |                      |                          |
-|                                        |            | 95CI (78.8%, 87.5%) |                      |                          |
-+----------------------------------------+------------+---------------------+----------------------+--------------------------+
-| Gradient Boost (Threshold \> 0.1)      | 90.2%      | 76.7%               | 97.9%                | 66.6%                    |
-|                                        |            |                     |                      |                          |
-|                                        |            | 95CI (71.5%,81.5%)  |                      |                          |
-+----------------------------------------+------------+---------------------+----------------------+--------------------------+
++----------------------------------------+-------+---------------------+----------------------+--------------------------+
+| Model Type                             | AUC   | Accuracy            | Sensitivity (Podium) | Specificity (Not Podium) |
++========================================+=======+=====================+======================+==========================+
+| Logistic Regression (Threshold \> 0.4) | 92.5% | 80.8%               | 93.9%                | 74.2%                    |
+|                                        |       |                     |                      |                          |
+|                                        |       | 95CI (75.9%, 85.1%) |                      |                          |
++----------------------------------------+-------+---------------------+----------------------+--------------------------+
+| Random Forest (Threshold \> 0.4)       | 92.1% | 83.5%               | 87.9%                | 81.3%                    |
+|                                        |       |                     |                      |                          |
+|                                        |       | 95CI (78.8%, 87.5%) |                      |                          |
++----------------------------------------+-------+---------------------+----------------------+--------------------------+
+| Gradient Boost (Threshold \> 0.1)      | 90.2% | 76.7%               | 97.9%                | 66.6%                    |
+|                                        |       |                     |                      |                          |
+|                                        |       | 95CI (71.5%,81.5%)  |                      |                          |
++----------------------------------------+-------+---------------------+----------------------+--------------------------+
 
 Although the Boost model had the highest sensitivity parameter, the accuracy for that model is the weakest out of the 3 with a confidence interval that does not overlap either of the two models. Due to this difference, the two models that will be selected is the Logistic Regression for Sensitivity and Random Forest for Specificity.
 
@@ -201,24 +198,47 @@ The agreement across both models is that the car performance has a large effect 
 
 We used ROC curves on default settings to find an overview comparison of each model and their optimal threshold values for spots (1-6). (See Appendix for additional ROC curves)
 
-+----------------------------------------+------------+---------------------+----------------------+--------------------------+
-| Model Type                             | AUC        | Accuracy            | Sensitivity (Podium) | Specificity (Not Podium) |
-+========================================+============+=====================+======================+==========================+
-| Logistic Regression (Threshold \> 0.4) | 92.5%      | 80.8%               | 93.9%                | 74.2%                    |
-|                                        |            |                     |                      |                          |
-|                                        |            | 95CI (75.9%, 85.1%) |                      |                          |
-+----------------------------------------+------------+---------------------+----------------------+--------------------------+
-| Random Forest (Threshold \> 0.4)       | 92.1%      | 83.5%               | 87.9%                | 81.3%                    |
-|                                        |            |                     |                      |                          |
-|                                        |            | 95CI (78.8%, 87.5%) |                      |                          |
-+----------------------------------------+------------+---------------------+----------------------+--------------------------+
-| Gradient Boost (Threshold \> 0.1)      | 90.2%      | 76.7%               | 97.9%                | 66.6%                    |
-|                                        |            |                     |                      |                          |
-|                                        |            | 95CI (71.5%,81.5%)  |                      |                          |
-+----------------------------------------+------------+---------------------+----------------------+--------------------------+
++----------------------------------------+-------+---------------------+----------------------+--------------------------+
+| Model Type                             | AUC   | Accuracy            | Sensitivity (Podium) | Specificity (Not Podium) |
++========================================+=======+=====================+======================+==========================+
+| Logistic Regression (Threshold \> 0.4) | 92.5% | 80.8%               | 93.9%                | 74.2%                    |
+|                                        |       |                     |                      |                          |
+|                                        |       | 95CI (75.9%, 85.1%) |                      |                          |
++----------------------------------------+-------+---------------------+----------------------+--------------------------+
+| Random Forest (Threshold \> 0.4)       | 92.1% | 83.5%               | 87.9%                | 81.3%                    |
+|                                        |       |                     |                      |                          |
+|                                        |       | 95CI (78.8%, 87.5%) |                      |                          |
++----------------------------------------+-------+---------------------+----------------------+--------------------------+
+| Gradient Boost (Threshold \> 0.1)      | 90.2% | 76.7%               | 97.9%                | 66.6%                    |
+|                                        |       |                     |                      |                          |
+|                                        |       | 95CI (71.5%,81.5%)  |                      |                          |
++----------------------------------------+-------+---------------------+----------------------+--------------------------+
 
-## ######## THIS PART WILL BE FOR ADDITIONAL ANALYSIS FOR MID-FIELD ANALYSIS###\# 
+## \######## THIS PART WILL BE FOR ADDITIONAL ANALYSIS FOR MID-FIELD ANALYSIS
 
 # CONCLUSION TO PURPOSE 1
 
-# PURPOSE 2 ANALYSIS (Type below this line and I will type above it.  
+# PURPOSE 2 ANALYSIS (Type below this line and I will type above it.
+
+To analyze the variable importance and coefficients found within Teams, which have very similar cars, and for Individuals. In other words... what factors have a higher importance for each team/individual? Is this a positive or negative correlation?
+
+## Method
+
+For each team/individual a random forest model will be used to assess Variable Importance. Secondly, a Logistic Regression model will be used to analyze coefficients. Teams were chosen so that the greatest number of data points were available where both team members remained the same. Individuals were chosen so that the greatest number of data points were available in which the team remained the same. The specific classification group (Win-Loss / Podium - Not / Top 6 - Not) that will be chosen for each team/individual will be based upon the highest Specificity & Sensitivity. We will not be analyzing one team against another, or one individual against another. Instead we will be focusing on the classification that provides the best approach to understanding that specific team/individual in question. For instance... Perez and Stroll do not finish in 1st enough times for the Win-Loss approach to be appropriate. On the other hand, Bottas & Hamilton rarely find themselves outside of the top 3.
+
+## TEAMS
+
+| Team         | Years                  | Individuals       | Sample Size |
+|--------------|------------------------|-------------------|-------------|
+| Ferrari      | 2018 & 2019            | Leclerc & Vettel  | 80          |
+| Mercedes     | 2018,2019,2020, & 2021 | Bottas & Hamilton | 160         |
+| Racing Point | 2019,2020              | Perez & Stroll    | 80          |
+
+## INDIVIDUALS
+
+| Individual     | \| Years              | \| Team  | Sample Size |
+|----------------|-----------------------|----------|-------------|
+| Bottas         | 2018,2019,2020,& 2021 | Mercedes | 80          |
+| Vettel         | 2018,2019,& 2020      | Ferrari  | 60          |
+| Max Verstappen | 2018,2019,2020,& 2021 | Red Bull | 80          |
+| Hamilton       | 2018,2019,2020,& 2021 | Mercedes | 80          |
