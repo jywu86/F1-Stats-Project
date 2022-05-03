@@ -587,14 +587,14 @@ factor <- function(team) {
 
 factor_teams <- c('Rainfall2','Type','finish_tier','driverRef')
 str(mydata_team_win)
-ferrari_team_win <- mydata_team_win %>% filter(constructorRef == 'ferrari'& (year == 2018 | year == 2019))
+ferrari_team_win <- mydata_team_win %>% filter(constructorRef == 'ferrari'& (driverRef == "vettel" | driverRef == "leclerc"))
 str(ferrari_team_win)
 ferrari_team_win <- subset(ferrari_team_win,select = -c(constructorRef,team_rank,year))
 #ferrari_team_win[,factor_teams] <- lapply(ferrari_team_win[,factor_teams],factor)
-ferrari_team_3 <- mydata_team_3 %>% filter(constructorRef == 'ferrari'& (year == 2018 | year == 2019))
+ferrari_team_3 <- mydata_team_3 %>% filter(constructorRef == 'ferrari'& (driverRef == "vettel" | driverRef == "leclerc"))
 ferrari_team_3 <- subset(ferrari_team_3,select = -c(constructorRef,team_rank,year))
 #ferrari_team_3[,factor_teams] <- lapply(ferrari_team_3[,factor_teams],factor)
-ferrari_team_6<- mydata_team_6 %>% filter(constructorRef == 'ferrari'& (year == 2018 | year == 2019))
+ferrari_team_6<- mydata_team_6 %>% filter(constructorRef == 'ferrari'& (driverRef == "vettel" | driverRef == "leclerc"))
 ferrari_team_6 <- subset(ferrari_team_6,select = -c(constructorRef,team_rank,year))
 #ferrari_team_wi6[,factor_teams] <- lapply(ferrari_team_6[,factor_teams],factor)
 
@@ -629,23 +629,23 @@ ferrari_team_6 <- factor(ferrari_team_6)
 racingpoint_team_win <- factor(racingpoint_team_win)
 racingpoint_team_3 <- factor(racingpoint_team_3)
 racingpoint_team_6 <- factor(racingpoint_team_6)
-str(mercedes_team_win)
+str(ferrari_team_3)
 
 set.seed(24)
-ind_f_t_w <- sample(2, nrow(ferrari_team_win), replace=T, prob=c(0.5,0.5))
+ind_f_t_w <- sample(2, nrow(ferrari_team_win), replace=T, prob=c(0.7,0.3))
 train_pod_f_t_w <- ferrari_team_win[ind_f_t_w==1,]
 test_pod_f_t_w <- ferrari_team_win[ind_f_t_w==2,]
-ind_f_t_3 <- sample(2, nrow(ferrari_team_3), replace=T, prob=c(0.5,0.5))
+ind_f_t_3 <- sample(2, nrow(ferrari_team_3), replace=T, prob=c(0.6,0.4))
 train_pod_f_t_3 <- ferrari_team_3[ind_f_t_3==1,]
 test_pod_f_t_3 <- ferrari_team_3[ind_f_t_3==2,]
-ind_f_t_6 <- sample(2, nrow(ferrari_team_6), replace=T, prob=c(0.9,0.1))
+ind_f_t_6 <- sample(2, nrow(ferrari_team_6), replace=T, prob=c(0.7,0.3))
 train_pod_f_t_6 <- ferrari_team_6[ind_f_t_6==1,]
 test_pod_f_t_6 <- ferrari_team_6[ind_f_t_6==2,]
 
 
-f_m_w <- glm(finish_tier ~grid+Rainfall2+dist.mi+qualifying_dif,family='binomial',data=train_pod_f_t_w)
-f_m_3 <- glm(finish_tier ~Air.Temp+grid,family='binomial',data=train_pod_f_t_3)
-f_m_6 <- glm(finish_tier ~Rainfall2+Track.Temp+driverRef+qualifying_dif+grid+Air.Temp,family='binomial',data=train_pod_f_t_6)
+f_m_w <- glm(finish_tier ~qualifying_dif+Wind.Speed+Type+grid+Track.Temp+dist.mi,family='binomial',data=train_pod_f_t_w)
+f_m_3 <- glm(finish_tier ~ qualifying_dif+Wind.Speed+Type+grid+Track.Temp,family='binomial',data=train_pod_f_t_3)
+f_m_6 <- glm(finish_tier ~.,family='binomial',data=train_pod_f_t_6)
 
 f_m_w_pred <- predict(f_m_w,test_pod_f_t_w,type='response')
 f_m_3_pred <- predict(f_m_3,test_pod_f_t_3,type='response')
@@ -687,10 +687,10 @@ set.seed(24)
 ind_m_t_w <- sample(2, nrow(mercedes_team_win), replace=T, prob=c(0.7,0.3))
 train_pod_m_t_w <- mercedes_team_win[ind_m_t_w==1,]
 test_pod_m_t_w <- mercedes_team_win[ind_m_t_w==2,]
-ind_m_t_3 <- sample(2, nrow(mercedes_team_3), replace=T, prob=c(0.7,0.3))
+ind_m_t_3 <- sample(2, nrow(mercedes_team_3), replace=T, prob=c(0.6,0.4))
 train_pod_m_t_3 <- mercedes_team_3[ind_m_t_3==1,]
 test_pod_m_t_3 <- mercedes_team_3[ind_m_t_3==2,]
-ind_m_t_6 <- sample(2, nrow(mercedes_team_6), replace=T, prob=c(0.7,0.3))
+ind_m_t_6 <- sample(2, nrow(mercedes_team_6), replace=T, prob=c(0.6,0.4))
 train_pod_m_t_6 <- mercedes_team_6[ind_m_t_6==1,]
 test_pod_m_t_6 <- mercedes_team_6[ind_m_t_6==2,]
 
@@ -739,14 +739,14 @@ set.seed(24)
 ind_rp_t_w <- sample(2, nrow(racingpoint_team_win), replace=T, prob=c(0.9,0.1))
 train_pod_rp_t_w <- racingpoint_team_win[ind_rp_t_w==1,]
 test_pod_rp_t_w <- racingpoint_team_win[ind_rp_t_w==2,]
-ind_rp_t_3 <- sample(2, nrow(racingpoint_team_3), replace=T, prob=c(0.9,0.1))
+ind_rp_t_3 <- sample(2, nrow(racingpoint_team_3), replace=T, prob=c(0.6,0.4))
 train_pod_rp_t_3 <- racingpoint_team_3[ind_rp_t_3==1,]
 test_pod_rp_t_3 <- racingpoint_team_3[ind_rp_t_3==2,]
-ind_rp_t_6 <- sample(2, nrow(racingpoint_team_6), replace=T, prob=c(0.9,0.1))
+ind_rp_t_6 <- sample(2, nrow(racingpoint_team_6), replace=T, prob=c(0.55,0.45))
 train_pod_rp_t_6 <- racingpoint_team_6[ind_rp_t_6==1,]
 test_pod_rp_t_6 <- racingpoint_team_6[ind_rp_t_6==2,]
 
-
+str(racingpoint_team_3)
 rp_m_w <- glm(finish_tier ~.,family='binomial',data=train_pod_rp_t_w)
 rp_m_3 <- glm(finish_tier ~.,family='binomial',data=train_pod_rp_t_3)
 rp_m_6 <- glm(finish_tier ~.,family='binomial',data=train_pod_rp_t_6)
