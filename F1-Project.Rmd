@@ -22,13 +22,10 @@ The data used for this project was a mixture of a public dataset from Kaggle (<h
 
 This data was broken down into multiple sheets with cross referenced ids and had data available for races from 1950 to 2020. The sheets are broken down into mainly two types of data: reference data and result data. Not all data was used to create the models and a summary of the data used is listed below. Additionally, enhancements to some of the data was used to further enrich additional variables for data modeling.
 
-+--------------+------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------+
 | Dataset Name | Description                                                                  | Additional Enhancements                                                                                                  |
-+==============+==============================================================================+==========================================================================================================================+
+|--------------|------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|
 | qualifying   | Summary of qualifying session for each race. Data included all session times | Track Temp, Air Temp, Wind Speed was added via python package FastF1                                                     |
-+--------------+------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------+
 | results      | Summary of race results per driver and team                                  | Air Temp, Track Temp, Wind Speed, Weather, Car Performance Metric, Fastest Lap was found per driver, Turns, Sharp Turns, |
-+--------------+------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------+
 
 ## Data Selection
 
@@ -64,7 +61,7 @@ To understand the differences between top, mid-tier, and backmarkers, we decided
 
 ### Race Wins:
 
-To find the best classification model, we decided to run 3 different types of models: logistic regression, random forest, and XgBoost. With XgBoost, we tuned our model by looking at a variety of parameters (iterations, tree_depth, learn_rate, and gamma function). \##### MAYBE NEED TO INSERT ADDITIONAL CHARTS FOR PARAMETER TUNING
+To find the best classification model, we decided to run 3 different types of models: logistic regression, random forest, and XgBoost. With XgBoost, we tuned our model by looking at a variety of parameters (iterations, tree_depth, learn_rate, and gamma function). ####\# MAYBE NEED TO INSERT ADDITIONAL CHARTS FOR PARAMETER TUNING
 
 We used ROC curves based on test data to give us an overview with default parameters to find the optimal threshold for each model and looked at the overall accuracy, specificity, and sensitivity (with "Win" as the positive class) for all three models.
 
@@ -233,7 +230,7 @@ Comparing the 3 models, the logistic regression had the highest AUC and all were
 
 In gradient boost, the top variables were grid, qualifying_dif, Track.Temp, and to a smaller degree drivers. We will use these top variables to build our model and fine tune the specific parameters surrounding XgBoost (rounds, max_depth, learning rate, and gamma loss). We found that with boosting iterations of 1600, the accuracy was the highest; however the first dip in accuracy occurs at a boost iteration of 300.
 
-## \######## THIS PART WILL BE FOR ADDITIONAL ANALYSIS FOR MID-FIELD ANALYSIS
+## ######## THIS PART WILL BE FOR ADDITIONAL ANALYSIS FOR MID-FIELD ANALYSIS
 
 # CONCLUSION TO PURPOSE 1
 
@@ -247,26 +244,17 @@ For each team/individual a random forest model will be used to assess Variable I
 
 ## TEAMS
 
-+--------------+------------------------+-------------------+-------------+----------------+--------------------------+
 | Team         | Years                  | Individuals       | Sample Size | Classification | AUC (Sens,Spec)          |
-+==============+========================+===================+=============+================+==========================+
+|--------------|------------------------|-------------------|-------------|----------------|--------------------------|
 | Ferrari      | 2018,2019,2020, & 2021 | Leclerc & Vettel  | 113         | Win            | AUC:83.3%,(63.7%,100%)   |
-+--------------+------------------------+-------------------+-------------+----------------+--------------------------+
 | Mercedes     | 2018,2019,2020, & 2021 | Bottas & Hamilton | 160         | Win            | AUC: 84.9%,(79.3%,92.3%) |
-+--------------+------------------------+-------------------+-------------+----------------+--------------------------+
 | Racing Point | 2019,2020              | Perez & Stroll    | 63          | Top 6          | AUC: 74.2%,(76.2%,75%)   |
-+--------------+------------------------+-------------------+-------------+----------------+--------------------------+
 
 ## INDIVIDUALS
 
-+----------------+-----------------------+---------------+---------------+
-| Individual     | \| Years              | \| Team       | Sample Size   |
-+================+=======================+===============+===============+
-| Bottas         | 2018,2019,2020,& 2021 | Mercedes      | 80            |
-+----------------+-----------------------+---------------+---------------+
-| Vettel         | 2018,2019,& 2020      | Ferrari       | 60            |
-+----------------+-----------------------+---------------+---------------+
-| Max Verstappen | 2018,2019,2020,& 2021 | Red Bull      | 80            |
-+----------------+-----------------------+---------------+---------------+
-| Hamilton       | 2018,2019,2020,& 2021 | Mercedes      | 80            |
-+----------------+-----------------------+---------------+---------------+
+| Individual     | \| Years              | \| Team  | Sample Size |
+|----------------|-----------------------|----------|-------------|
+| Bottas         | 2018,2019,2020,& 2021 | Mercedes | 80          |
+| Vettel         | 2018,2019,& 2020      | Ferrari  | 60          |
+| Max Verstappen | 2018,2019,2020,& 2021 | Red Bull | 80          |
+| Hamilton       | 2018,2019,2020,& 2021 | Mercedes | 80          |
