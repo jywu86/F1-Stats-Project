@@ -34,9 +34,15 @@ This data was broken down into multiple sheets with cross referenced ids and had
 
 ## Data Assumptions and Wrangling
 
+<<<<<<< HEAD
 The majority of the data provided and extracted are categorical variables. The results of each race and amount of each race is a discrete distribution. However, the variables within each category are assumed to be normally distributed (average speed, lap times, temperature of environment, etc.).
 
 In the original dataset, there were 4 explanatory variables available to model our classification models. (grid, circuit, driver, fastest_speed) Our concern was the lack of additional variables given to us to produce models with different combination of variables. Therefore, a large effort was made to create additional variables such as Air.Temp, Track.Temp, Wind.Speed, Weather, Race.Circuit type (street or racing circuit), n_of_Sharp_Turns, car_performance, track_type based on speed, and turns per mile. We normalized car performance data by using the qualifying times of each team and comparing the difference in time of each team against the fastest team of the qualifying session.
+=======
+Formula 1 as a sport has changed drastically over the years and is broken down into separate eras of similar cars based on their technology. We would like to compare as similar of cars as possible so the era chosen was the most recent era coined the "Turbo-Hybrid" era which comes from the use of a hybrid engine along with turbos. This era began in 2014 and has only just ended in 2021 to make way for a new era in the sport. Furthermore, most contracts for drivers range between 1-5 years and many young drivers don't make it past 3-4 years in the sport.
+
+With this in mind we decided to utilize data from 2018 to 2021 to build our model and make an applicable equivalency to a typical contract length and to keep similar drivers and teams.
+>>>>>>> b8d3dacbcbd44938e07cdf88871c2fcb0cbc7b8a
 
 Lastly, due to the nature of the data there is some existence of dependencies with certain variables such as car performance, driver performance, and grid order. In our models we viewed each as a system of variables that describes a certain feature. (i.e grid is the location of the each racer relative to each other, car performance is the pure performance of a car by averaging two drivers, and driver's racecraft such as maneuvering, blocking, and/or ability to read situations).
 
@@ -58,7 +64,11 @@ To understand the differences between top, mid-tier, and backmarkers, we decided
 
 ### Race Wins:
 
+<<<<<<< HEAD
 To find the best classification model, we decided to run 3 different types of models: logistic regression, random forest, and XgBoost. One issue with classifying race wins is that the "Win" positive class is extremely small when compared with the "Lose" category. In the 81 races, there is a proportion of 5% (1 in 20 average) in the Win class and 95% in the Lose class. Therefore, to evaluate our model we will be heavily relying on the sensitivity accuracy.
+=======
+To find the best classification model, we decided to run 3 different types of models: logistic regression, random forest, and XgBoost. With XgBoost, we tuned our model by looking at a variety of parameters (iterations, tree_depth, learn_rate, and gamma function). \##### MAYBE NEED TO INSERT ADDITIONAL CHARTS FOR PARAMETER TUNING
+>>>>>>> b8d3dacbcbd44938e07cdf88871c2fcb0cbc7b8a
 
 We used ROC curves based on test data to give us an overview with default parameters to find the optimal threshold for each model and looked at the overall accuracy, specificity, and sensitivity (with "Win" as the positive class) for all three models.
 
@@ -235,22 +245,33 @@ For podiums, we see a similar result with the top drivers and a great emphasis o
 
 As we move away from the front of the grid, our models start to show that environmental factors start to outweigh some individual drivers. For instance, track temp was relatively high as compared to driver importance on the back marker models, but was not seen on either Race win model or Podium model.
 
+<<<<<<< HEAD
 To answer our original question of the factors that surround top teams, mid teams, and back markers; if you are a top team manager getting the right driver is critical. The difference between Bottas, Hamilton, and Max are fairly significant. If you are a mid tier team, your driver becomes slightly less important; getting someone like LeClerc where the potential to win is relatively high compared to his peers may get you towards the front of the pack. If you are on the backmarker, invest in your car and technology would be the advise. The environmental variables start to matter more in the back and the driver influences are harder to discern from each other. However, picking up someone like Sainz would be an ideal candidate given that it does not take away budget for investment into your car.
+=======
+## \######## THIS PART WILL BE FOR ADDITIONAL ANALYSIS FOR MID-FIELD ANALYSIS
+>>>>>>> b8d3dacbcbd44938e07cdf88871c2fcb0cbc7b8a
 
 However, in reality all Formula 1 teams employ a variety of these strategies. Some portions that are not highlighted in this model are how well the drivers can develop a car through experience. The different strategies employed by each team for each driver is also crucial to understand. Formula 1 is an exciting sport with a lot of interconnected variables. This project's purpose was to shed some light on potential factors that may matter more than others.
 
 # PURPOSE 2 ANALYSIS (Type below this line and I will type above it.
 
+<<<<<<< HEAD
 A teammate in F1 is the closest rival because this is the closest scenario in which two drivers may be operating equal machinery. The second purpose of this project is to evaluate individual drivers and their relative values when compared to their teammates.
 
 To analyze the variable importance and coefficients found within Teams, which have very similar cars, and for Individuals. In other words... what factors have a higher importance for each team/individual? Is this a positive or negative correlation?
+=======
+To analyze the variable importance and coefficients found within Teams, which have very similar cars, and for Individuals. What factors could be correlated to the cars performance, good or bad? What about individual Driver?
+
+Is Lewis Hamilton really worth \$30 million?
+>>>>>>> b8d3dacbcbd44938e07cdf88871c2fcb0cbc7b8a
 
 ## Method
 
-For each team/individual a random forest model will be used to assess Variable Importance. Secondly, a Logistic Regression model will be used to analyze coefficients. Teams were chosen so that the greatest number of data points were available where both team members remained the same. Individuals were chosen so that the greatest number of data points were available in which the team remained the same. The specific classification group (Win-Loss / Podium - Not / Top 6 - Not) that will be chosen for each team/individual will be based upon the highest Specificity & Sensitivity. We will not be analyzing one team against another, or one individual against another. Instead we will be focusing on the classification that provides the best approach to understanding that specific team/individual in question. For instance... Perez and Stroll do not finish in 1st enough times for the Win-Loss approach to be appropriate. On the other hand, Bottas & Hamilton rarely find themselves outside of the top 3.
+For each ind/team a random forest model will be used to assess Variable Importance. Secondly, a Logistic Regression model will be used to analyze coefficients. The Logit Regression models show values that did not have low P-Values and futher steps with a StepAIC analysis would without doubt remove many of the variables presented in the below graphs. These are purposefully kept in, as our purpose with the Logit Regression model is to understand whether or not an explanatory variable has a negative or positive association. However, variables with a significant p-value will be more than insightful. The classification (Win, Top3, Top6) chosen for each individual/team had the highest specificity/sensitivity. Since these are independent models, we chose the classification that best represented each ind/team.
 
 ## TEAMS
 
+<<<<<<< HEAD
 +--------------+------------------------+-------------------+-------------+----------------+--------------------------+
 | Team         | Years                  | Individuals       | Sample Size | Classification | AUC (Sens,Spec)          |
 +==============+========================+===================+=============+================+==========================+
@@ -1066,3 +1087,48 @@ boost3 <- train(finish_tier ~.,
 ```
 
 
+=======
++---------------+------------------------+-------------------+--------------------------+
+| Team          | Years                  | Individuals       | Sample Size (Train,Test) |
++===============+========================+===================+==========================+
+| Ferrari       | 2018,2019,2020, & 2021 | Leclerc & Vettel  | 113 (80% , 20%)          |
++---------------+------------------------+-------------------+--------------------------+
+| Mercedes      | 2018,2019,2020, & 2021 | Bottas & Hamilton | 162 (70%, 30%)           |
++---------------+------------------------+-------------------+--------------------------+
+
+![](http://127.0.0.1:10218/graphics/4e1789c4-4f1d-44d9-a41e-f42534c4b457.png)
+
+![](http://127.0.0.1:10218/graphics/de79a2c4-3b21-4bdb-9dd1-11a70121a44f.png)
+
+![](http://127.0.0.1:10218/graphics/b5bc5622-e0df-46f5-baf6-c39066ad67f2.png)
+
+### Insights (Teams):
+
+The most notable insight between Ferrari and Mercedes is the Variable Importance of Driver Reference. On Mercedes the most valuable node is if the Driver is Lewis Hamilton or not. Secondly, we see that this is a positive coefficient from our Logit model with a high P-value represented by the \*\*\*. On the other hand, Driver Reference for Ferrari had the lowest Variable Importance and while did not show any significance in our Ferrari W/L Logit model coefficient graph, it did have a pvalue of .1082 with 97 degrees of freedom. What this indicates is that when the "car" is accounted for Lewis Hamilton is showing why he is paid the highest amount in the league.Driver Ref == "Hamilton" had less than a .005 pvalue with 113 degrees of freedom. No other variable had a significance level less than .12.
+
+Another Insight considered, was the higher Variable Importance of environmental factors (Wind Speed, Track Temp, Weather) on the Ferrari team. As these environmental factors increase we see a negative correlation within our Ferrari Logit Coefficients. A deeper analysis shows that the Logit P-Values for Ferrari were (Wind Speed : .93, Track Temp: .53, & Rained : .99). In other words... there may be some value discovered by the Random Forest Variable Importance, but without more data these coefficients are unreliable.
+
+------------------------------------------------------------------------
+
+## INDIVIDUALS
+
+| Individual     | Years                  | Team     | Sample Size  |
+|----------------|------------------------|----------|--------------|
+| Bottas         | 2018,2019,2020, & 2021 | Mercedes | 78 (83%,17%) |
+| Max Verstappen | 2018,2019,2020, & 2021 | Red Bull | 69 (70%,30%) |
+| Hamilton       | 2018,2019,2020, & 2021 | Mercedes | 84 (75%,25%) |
+
+![](http://127.0.0.1:10218/graphics/45b6f359-39c5-494b-aeb1-0cda9dc1ddf5.png)
+
+![](http://127.0.0.1:10218/graphics/556f817b-5cda-471f-ba0a-713846a5cdc2.png)
+
+## ![](http://127.0.0.1:10218/graphics/85d0ea65-2d55-44f7-bbc7-a2dd3dfea9f4.png){width="689"}
+
+### Insights (Individuals):
+
+One notable insight from our individual racer models is the Importance of Team Rank for Hamilton and lack there of for Bottas. Keep in mind these two racers have been on the same team for the last four years. With that said, it might be plausible that the Team Rank variable (How well the "car" qualified) would indicate similar Importance for the two. If the overall Qualifying rank for the team is lower, insinuating a better environmental fit for the Mercedes car, then both Bottas & Hamilton might see a positive correlation. However, this isn't true for Bottas. This could be a further indication of Lewis Hamilton's ability to overcome environmental factors and only have the machine and himself to account for any mistakes. Secondly, Grid has very rarely been outside of the #1 Variable Importance factor. In further examination of the Lewis Hamilton Logit model, the p-value for "Grid" is .59. After doing a StepAIC() analysis the only remaining coefficient is Team_Rank and Gris is removed. Lewis Hamilton is showing that even when he falls lower in the Grid ranking position there is no significance in his ability to secure the Win. For further validation on this, the only coefficient with a significant P-Value for Bottas is the Grid at a p-value of 0.034.
+
+### Purpose 2 Conclusion:
+
+Each driver and each team have different Variable Importance factors and correlation. It can be difficult to dive further into this with such small sample sizes, and we aren't following the best practices for either model. We used the two different models to piece together an understanding of the factors that effect drivers/teams. That being said we were able to make some considerable correlations that we can be confident in. Lewis Hamilton is showing the ability to be beyond environmental factors, and even the strongest factor for any other driver... the starting position. Where other teams have very little difference between drivers, indicating a potential strength of the car, Mercedes winning a race is highly correlated with that driver being Lewis Hamilton. Another interesting item to note, is that Bottas had 8 wins himself. The true difference is that Hamilton had 47 alone. I'll leave you with the final answer. Is Lewis Hamilton worth \$30 million?
+>>>>>>> b8d3dacbcbd44938e07cdf88871c2fcb0cbc7b8a
