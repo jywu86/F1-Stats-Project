@@ -8,13 +8,23 @@ output:
   word_document: default
 ---
 
-# Background and Purpose
+# Background
 
 Formula 1 also known as F1 is a series of races (Grand Prix) that take place all across the world including countries from Europe, Asia, North America, and the Middle East. The sport has been around since the early 1950s and is considered as the premier league for open wheel racing. Points are awarded in each race to both the driver and the team that the driver belongs to. Each team is allowed two drivers with closely matched cars and currently (2022) there are 10 teams with 20 drivers in total. Each year two championships are awarded; one for the driver with the most points and the overall team (or constructor).
 
-Historically, F1 has been classified into three main tiers: "Top Teams", "Midfield" (AKA Formula 1.5), and "Backmarkers". A large reason why these top teams remain on top is due to the much larger budgets that can be up to four times that of a smaller team. The bulk of these larger teams' budgets is spent in development and can be many years ahead of teams considered in the backmarker. The same can be said for drivers, where the top driver from Mercedes (Lewis Hamilton) makes approximately \$30 million and the best driver from the backmarker team Haas (Mich Schumacher) makes approximately \$1 million. However, in 2020 a budget cap was agreed upon and team budgets are maximized at \$145 million per year. Currently, this does not include driver salaries however it would not be unfathomable to believe a salary cap may also be enforced in the future like many other professional sports.
+Historically, F1 has been classified into three main tiers: "Top Teams", "Midfield" (AKA Formula 1.5), and "Backmarkers". A large reason why these top teams remain on top is due to the much larger budgets that can be up to four times that of a smaller team. The bulk of these larger teams' budgets is spent in development and can be many years ahead of teams considered in the backmarker. The same can be said for drivers, where the top driver from Mercedes (Lewis Hamilton) makes approximately \$30 million and the best driver from the backmarker team Haas (Mich Schumacher) makes approximately \$1 million. However, in 2020 a budget cap was agreed upon and team budgets are maximized at \$145 million per year.
 
-The purpose of this project is to use classification models to understand the effect of which factors are the most important for top-tier, mid-pack, and back-marker and what would be an ideal strategy for each team aiming to move from each tier. Also to answer the question of how well does each driver reflect their current relative market value.
+After Netflix released the Docuseries "Formula 1: Drive to Survive", in 2019, popularity of the sport has skyrocketed. Especially in the United States. Las Vegas has recently confirmed that they intend to build the United States third Grand Prix venue. As newcomers are introduced to the sport, one question ruminates...
+
+Is it the car? Or the driver that matters?
+
+Both students on this project are coming from separate viewing lenses. John Wyu is an avid fan of the sport and loves to analyze the different strategies between drivers & teams. Scotty Smith is a newbie, and has no idea what makes a driver worth \$30 million. "I do enjoy being proven wrong" - Scotty.
+
+# Purpose
+
+The purpose of this project can be broken into two different sections. First, we want to analyze & understand the difference between the aforementioned skill "Tiers." These are Top-Tier, Mid-Pack, and Back-Marker. In doing so we will illustrate the beauty behind the sport, and where the strategy comes to play.
+
+Next, we want to dive deeper into the individuals & teams, and answer the looming question... Is Lewis Hamilton really worth \$30 million?
 
 # The Data and Wrangling
 
@@ -241,19 +251,21 @@ In gradient boost, the top variables were grid, qualifying_dif, Track.Temp, and 
 
 To analyze the variable importance and coefficients found within Teams, which have very similar cars, and for Individuals. What factors could be correlated to the cars performance, good or bad? What about individual Driver?
 
+Is Lewis Hamilton really worth \$30 million?
+
 ## Method
 
-For each ind/team a random forest model will be used to assess Variable Importance. Secondly, a Logistic Regression model will be used to analyze coefficients. The classification (Win, Top3, Top6) chosen for each individual/team had the highest specificity/sensitivity. Since these are independent models, we chose the classification that best represented each ind/team.
+For each ind/team a random forest model will be used to assess Variable Importance. Secondly, a Logistic Regression model will be used to analyze coefficients. The Logit Regression models show values that did not have low P-Values and futher steps with a StepAIC analysis would without doubt remove many of the variables presented in the below graphs. These are purposefully kept in, as our purpose with the Logit Regression model is to understand whether or not an explanatory variable has a negative or positive association. However, variables with a significant p-value will be more than insightful. The classification (Win, Top3, Top6) chosen for each individual/team had the highest specificity/sensitivity. Since these are independent models, we chose the classification that best represented each ind/team.
 
 ## TEAMS
 
-+---------------+------------------------+-------------------+---------------+
-| Team          | Years                  | Individuals       | Sample Size   |
-+===============+========================+===================+===============+
-| Ferrari       | 2018,2019,2020, & 2021 | Leclerc & Vettel  | 113           |
-+---------------+------------------------+-------------------+---------------+
-| Mercedes      | 2018,2019,2020, & 2021 | Bottas & Hamilton | 162           |
-+---------------+------------------------+-------------------+---------------+
++---------------+------------------------+-------------------+--------------------------+
+| Team          | Years                  | Individuals       | Sample Size (Train,Test) |
++===============+========================+===================+==========================+
+| Ferrari       | 2018,2019,2020, & 2021 | Leclerc & Vettel  | 113 (80% , 20%)          |
++---------------+------------------------+-------------------+--------------------------+
+| Mercedes      | 2018,2019,2020, & 2021 | Bottas & Hamilton | 162 (70%, 30%)           |
++---------------+------------------------+-------------------+--------------------------+
 
 ![](http://127.0.0.1:10218/graphics/4e1789c4-4f1d-44d9-a41e-f42534c4b457.png)
 
@@ -263,17 +275,19 @@ For each ind/team a random forest model will be used to assess Variable Importan
 
 ### Insights (Teams):
 
-The most notable insight between Ferrari and Mercedes is the Variable Importance of Driver Reference. On Mercedes the most valuable node is if the Driver is Lewis Hamilton or not. Secondly, we see that this is a positive coefficient from our Logit model with a high P-value represented by the \*\*\*. On the other hand, Driver Reference for Ferrari had the lowest Variable Importance and did not show any significance in our Ferrari W/L Logit model. What this indicates is that when the "car" is accounted for Lewis Hamilton is showing why he is paid the highest amount in the league. Another Insight to be gained, is the importance of environmental factors (Wind Speed, Track Temp, Weather) on the Ferrari team. As these environmental factors increase we see a negative correlation within our Ferrari Logit Coefficients. However, these coefficients do not have a high P-value and they must be taken with some caution. On the other hand, Mercedes is not as susceptible to environmental factors.
+The most notable insight between Ferrari and Mercedes is the Variable Importance of Driver Reference. On Mercedes the most valuable node is if the Driver is Lewis Hamilton or not. Secondly, we see that this is a positive coefficient from our Logit model with a high P-value represented by the \*\*\*. On the other hand, Driver Reference for Ferrari had the lowest Variable Importance and while did not show any significance in our Ferrari W/L Logit model coefficient graph, it did have a pvalue of .1082 with 97 degrees of freedom. What this indicates is that when the "car" is accounted for Lewis Hamilton is showing why he is paid the highest amount in the league.Driver Ref == "Hamilton" had less than a .005 pvalue with 113 degrees of freedom. No other variable had a significance level less than .12.
 
-------------------------------------------------------------------------------------------------------------------------------------------
+Another Insight considered, was the higher Variable Importance of environmental factors (Wind Speed, Track Temp, Weather) on the Ferrari team. As these environmental factors increase we see a negative correlation within our Ferrari Logit Coefficients. A deeper analysis shows that the Logit P-Values for Ferrari were (Wind Speed : .93, Track Temp: .53, & Rained : .99). In other words... there may be some value discovered by the Random Forest Variable Importance, but without more data these coefficients are unreliable.
+
+------------------------------------------------------------------------
 
 ## INDIVIDUALS
 
-| Individual     | Years                  | Team     | Sample Size |
-|----------------|------------------------|----------|-------------|
-| Bottas         | 2018,2019,2020, & 2021 | Mercedes | 78          |
-| Max Verstappen | 2018,2019,2020, & 2021 | Red Bull | 69          |
-| Hamilton       | 2018,2019,2020, & 2021 | Mercedes | 84          |
+| Individual     | Years                  | Team     | Sample Size  |
+|----------------|------------------------|----------|--------------|
+| Bottas         | 2018,2019,2020, & 2021 | Mercedes | 78 (83%,17%) |
+| Max Verstappen | 2018,2019,2020, & 2021 | Red Bull | 69 (70%,30%) |
+| Hamilton       | 2018,2019,2020, & 2021 | Mercedes | 84 (75%,25%) |
 
 ![](http://127.0.0.1:10218/graphics/45b6f359-39c5-494b-aeb1-0cda9dc1ddf5.png)
 
@@ -283,8 +297,8 @@ The most notable insight between Ferrari and Mercedes is the Variable Importance
 
 ### Insights (Individuals):
 
-One notable insight from our individual racer models is the Importance of Team Rank for Hamilton and lack there of for Bottas. Keep in mind these two racers have been on the same team for the last four years. With that said, it might be plausible that the Team Rank variable (How well the "Car" qualified) would indicate similar Importance for the two. If the overall Qualifying rank for the team is lower, insinuating a better environmental fit for the Mercedes car, then both Bottas & Hamilton might see a positive correlation. However, this isn't true for Bottas. This could be a further indication of Lewis Hamilton's ability to overcome environmental factors and only have the machine and himself to account for any mistakes.
+One notable insight from our individual racer models is the Importance of Team Rank for Hamilton and lack there of for Bottas. Keep in mind these two racers have been on the same team for the last four years. With that said, it might be plausible that the Team Rank variable (How well the "car" qualified) would indicate similar Importance for the two. If the overall Qualifying rank for the team is lower, insinuating a better environmental fit for the Mercedes car, then both Bottas & Hamilton might see a positive correlation. However, this isn't true for Bottas. This could be a further indication of Lewis Hamilton's ability to overcome environmental factors and only have the machine and himself to account for any mistakes. Secondly, Grid has very rarely been outside of the #1 Variable Importance factor. In further examination of the Lewis Hamilton Logit model, the p-value for "Grid" is .59. After doing a StepAIC() analysis the only remaining coefficient is Team_Rank and Gris is removed. Lewis Hamilton is showing that even when he falls lower in the Grid ranking position there is no significance in his ability to secure the Win. For further validation on this, the only coefficient with a significant P-Value for Bottas is the Grid at a p-value of 0.034.
 
 ### Purpose 2 Conclusion:
 
-Each driver and each team have different Variable Importance factors and correlation. It can be difficult to dive further into this with such small sample sizes, but nonetheless we can abstract a few valuable insights.
+Each driver and each team have different Variable Importance factors and correlation. It can be difficult to dive further into this with such small sample sizes, and we aren't following the best practices for either model. We used the two different models to piece together an understanding of the factors that effect drivers/teams. That being said we were able to make some considerable correlations that we can be confident in. Lewis Hamilton is showing the ability to be beyond environmental factors, and even the strongest factor for any other driver... the starting position. Where other teams have very little difference between drivers, indicating a potential strength of the car, Mercedes winning a race is highly correlated with that driver being Lewis Hamilton. Another interesting item to note, is that Bottas had 8 wins himself. The true difference is that Hamilton had 47 alone. I'll leave you with the final answer. Is Lewis Hamilton worth \$30 million?

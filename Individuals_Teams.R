@@ -73,7 +73,7 @@ ferrari_team_win <- factor(ferrari_team_win)
 
 
 set.seed(24)
-ind_f_t_w <- sample(2, nrow(ferrari_team_win), replace=T, prob=c(0.8,0.2))
+ind_f_t_w <- sample(2, nrow(ferrari_team_win), replace=T, prob=c(0.80,0.20))
 train_pod_f_t_w <- ferrari_team_win[ind_f_t_w==1,]
 test_pod_f_t_w <- ferrari_team_win[ind_f_t_w==2,]
 
@@ -87,12 +87,12 @@ f_m_w_rf <- train(finish_tier ~grid+Wind.Speed+Track.Temp+Rainfall2+driverRef+tu
 f_m_w_log <- train.glm(finish_tier~ grid+driverRef+Wind.Speed+Track.Temp+Rainfall2+turns_s_mile,data=train_pod_f_t_w,method='glm.fit')
 
 
-
+f_m_w_rf$coefnames
 
 f_m_w_rf_pred <- predict(f_m_w_rf,test_pod_f_t_w,type='prob')
 f_m_w_log_pred <- predict(f_m_w_log,test_pod_f_t_w,type='prob')
 
-f_m_w_rf
+summary(f_m_w_log)
 
 
 
@@ -101,7 +101,11 @@ f_m_w <- multiclass.roc(test_pod_f_t_w$finish_tier,f_m_w_rf_pred$Win, percent=TR
 f_m_w  <- f_m_w[['rocs']]
 f_m_w  <-f_m_w[[1]]
 
+f_m_w
 
+stepAIC(f_m_w_log)
+f_m_w_log2 <- train.glm(finish_tier~ grid+driverRef,data=train_pod_f_t_w,method='glm.fit')
+summary(f_m_w_log2)
 
 
 f_m_w2 <- multiclass.roc(test_pod_f_t_w$finish_tier,f_m_w_log_pred$prediction[,'Win'], percent=TRUE)
@@ -157,7 +161,7 @@ m_m_w <- train(finish_tier ~.,data=train_pod_m_t_w,method='rf',trControl = cvcon
 m_m_w_log.glm <- train.glm(finish_tier~ .,data=train_pod_m_t_w,method='glm.fit')
 
 
-
+summary(m_m_w_log.glm)
 
 m_m_w_pred <- predict(m_m_w,test_pod_m_t_w,type='prob')
 m_m_w_lpred.glm <- predict(m_m_w_log.glm,test_pod_m_t_w,type="prob")
@@ -231,9 +235,9 @@ max_rf_wpred <- predict(max_rf_w,test_max_w,type='prob')
 max_log_wpred <- predict(max_log_w,test_max_w,type="prob")
 max_rf_wpred
 
+summary(max_log_w)
 
-
-summary(max_rf_wpred)
+summary(max_log_w)
 
 max_w_roc <- multiclass.roc(test_max_w$finish_tier,max_rf_wpred$Win, percent=TRUE)
 max_w_roc <- max_w_roc[['rocs']]
@@ -288,7 +292,7 @@ str(train_hamilton_w)
 hamilton_rf_w <- train(finish_tier ~.,data=train_hamilton_w,method='rf',trControl = cvcontrol,importance=TRUE)
 hamilton_log_w <- train.glm(finish_tier~ .,data=train_hamilton_w,method='glm.fit')
 plot_model(hamilton_log_w,show.values=TRUE,transform = NULL,ci.lvl=NA)
-hamilton_rf_w
+stepAIC(hamilton_log_w)
 
 
 hamilton_rf_wpred <- predict(hamilton_rf_w,test_hamilton_w,type='prob')
@@ -350,6 +354,7 @@ botta_rf_3 <- train(finish_tier ~.,data=train_botta_3,method='rf',trControl = cv
 botta_log_3 <- train.glm(finish_tier~ .,data=train_botta_3,method='glm.fit')
 plot_model(botta_log_3,show.values=TRUE,transform = NULL,ci.lvl=NA)
 botta_rf_3
+summary(botta_log_3)
 
 botta_rf_3pred <- predict(botta_rf_3,test_botta_3,type='prob')
 botta_log_3pred <- predict(botta_log_3,test_botta_3,type="prob")
