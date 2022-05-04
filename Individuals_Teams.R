@@ -212,6 +212,9 @@ plot(varImp(f_m_w_rf),main='Var Imp Ferrari')
 plot_grid(pm,pm2)
 
 plot_grid(gg1,gg2)
+plot_grid(gg3,gg4,gg5,nrow=1)
+
+plot_grid(pm3,pm4,pm5,nrow=1)
 
 ggroc(c(roc1,roc2,roc3,roc4),aes="group")
 ######## Max
@@ -259,7 +262,21 @@ plot.roc(max_w_rocl,
          cex.main=1.2,
          cex.lab=1.2)
 
-plot_model(max_log_w,show.values=TRUE,transform = NULL,ci.lvl=NA)
+labels3 <- c('Grid','Track Temp','Wind Speed','Rained','Team Rank','Sharp Turns/Mi')
+values3 <- as.numeric(varImp(max_rf_w)[1]$importance[,'Win'])
+data3 <- data.frame(labels3,values3)
+gg3<- ggplot(data3,aes(values3,reorder(labels3,+values3)),width=100)+   
+  geom_bar(stat = "identity",width=0.2,fill='skyblue') +
+  xlab('Importance') +
+  ylab(NULL) +
+  ggtitle('VI Max W/L RF') +
+  theme(text=element_text(size=10,color='grey3'),axis.text.y=element_text(colour='black'))
+gg3
+
+pm3 <- plot_model(max_log_w,show.values=TRUE,transform = NULL,ci.lvl=NA,title='Max W/L',dot.size=1,value.size=5)
+levels(pm3$data$term)<- c('Sharp Turns/Mi','Team Rank','Rained','Wind Speed','Track Temp','Grid')
+pm3
+varImp(max_rf_w)[1]$importance
 levels(pm$data$term)<- c('Sharp Turns/Mi','Rained','Track Temp','Wind Speed','Driver Vettel','Grid')
 plot(varImp(max_rf_w))
 ####### Lewis
@@ -304,7 +321,23 @@ plot.roc(hamilton_w_rocl,
          cex.main=1.2,
          cex.lab=1.2)
 plot_model(hamilton_log_w,show.values=TRUE,transform = NULL,ci.lvl=NA)
+pm4 <- plot_model(hamilton_log_w,show.values=TRUE,transform = NULL,ci.lvl=NA,title='Lewis W/L',dot.size=1,value.size=5)
+levels(pm4$data$term)<- c('Sharp Turns/Mi','Team Rank','Rained','Wind Speed','Track Temp','Grid')
+pm4
 plot(varImp(hamilton_rf_w))
+
+
+labels4 <- c('Grid','Track Temp','Wind Speed','Rained','Team Rank','Sharp Turns/Mi')
+values4 <- as.numeric(varImp(hamilton_rf_w)[1]$importance[,'Win'])
+data4 <- data.frame(labels4,values4)
+gg4<- ggplot(data4,aes(values4,reorder(labels4,+values4)),width=100)+   
+  geom_bar(stat = "identity",width=0.2,fill='skyblue') +
+  xlab('Importance') +
+  ylab(NULL) +
+  ggtitle('VI Hamilton W/L RF') +
+  theme(text=element_text(size=10,color='grey3'),axis.text.y=element_text(colour='black'))
+gg4
+varImp(hamilton_rf_w)[1]$importance
 ###### Bottas
 
 set.seed(24)
@@ -350,4 +383,19 @@ plot.roc(botta_3_rocl,
          cex.lab=1.2)
 
 plot_model(botta_log_3,show.values=TRUE,transform = NULL,ci.lvl=NA)
+pm5 <- plot_model(botta_log_3,show.values=TRUE,transform = NULL,ci.lvl=NA,title='Bottas Top3',dot.size=1,value.size=5)
+levels(pm5$data$term)<- c('Sharp Turns/Mi','Team Rank','Rained','Wind Speed','Track Temp','Grid')
+pm5
 plot(varImp(botta_rf_3))
+
+labels5 <- c('Grid','Track Temp','Wind Speed','Rained','Team Rank','Sharp Turns/Mi')
+values5 <- as.numeric(varImp(botta_rf_3)[1]$importance[,'Top3'])
+data5 <- data.frame(labels5,values5)
+gg5<- ggplot(data5,aes(values5,reorder(labels5,+values5)),width=100)+   
+  geom_bar(stat = "identity",width=0.2,fill='skyblue') +
+  xlab('Importance') +
+  ylab(NULL) +
+  ggtitle('VI Bottas Top3 RF') +
+  theme(text=element_text(size=10,color='grey3'),axis.text.y=element_text(colour='black'))
+gg5
+varImp(botta_rf_3)[1]$importance

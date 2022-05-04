@@ -12,7 +12,7 @@ output:
 
 Formula 1 also known as F1 is a series of races (Grand Prix) that take place all across the world including countries from Europe, Asia, North America, and the Middle East. The sport has been around since the early 1950s and is considered as the premier league for open wheel racing. Points are awarded in each race to both the driver and the team that the driver belongs to. Each team is allowed two drivers with closely matched cars and currently (2022) there are 10 teams with 20 drivers in total. Each year two championships are awarded; one for the driver with the most points and the overall team (or constructor).
 
-Historically, F1 has been classified into three main tiers: "Top Teams", "Midfield" (AKA Formula 1.5), and "Backmarkers". A large reason why these top teams remain on top is due to the much larger budgets and can be up to four times the budget of a smaller team. The bulk of these larger teams' budgets is spent in development and can be many years ahead of teams considered in the backmarker. The same can be said for drivers, where the top driver from Mercedes (Lewis Hamilton) makes approximately \$30 million and the best driver from the backmarker team Haas (Mich Schumacher) makes approximately \$1 million. However, in 2020 a budget cap was agreed upon and team budgets are maximized at \$145 million per year. Currently, this does not include driver salaries however it would not be unfathomable to believe a salary cap may also be enforced in the future like many other professional sports.
+Historically, F1 has been classified into three main tiers: "Top Teams", "Midfield" (AKA Formula 1.5), and "Backmarkers". A large reason why these top teams remain on top is due to the much larger budgets that can be up to four times that of a smaller team. The bulk of these larger teams' budgets is spent in development and can be many years ahead of teams considered in the backmarker. The same can be said for drivers, where the top driver from Mercedes (Lewis Hamilton) makes approximately \$30 million and the best driver from the backmarker team Haas (Mich Schumacher) makes approximately \$1 million. However, in 2020 a budget cap was agreed upon and team budgets are maximized at \$145 million per year. Currently, this does not include driver salaries however it would not be unfathomable to believe a salary cap may also be enforced in the future like many other professional sports.
 
 The purpose of this project is to use classification models to understand the effect of which factors are the most important for top-tier, mid-pack, and back-marker and what would be an ideal strategy for each team aiming to move from each tier. Also to answer the question of how well does each driver reflect their current relative market value.
 
@@ -32,9 +32,9 @@ This data was broken down into multiple sheets with cross referenced ids and had
 
 ## Data Selection
 
-Formula 1 as a sport has changed drastically over the years and is broken down into separate eras of similar cars based on their technology. We would like to compare as similar of cars as possible so the era chosen was the most recent era called the "Turbo-Hybrid" era which comes from the use of a hybrid engine along with turbos and occurred between 2014 to 2021 which is the subset of our analysis.
+Formula 1 as a sport has changed drastically over the years and is broken down into separate eras of similar cars based on their technology. We would like to compare as similar of cars as possible so the era chosen was the most recent era coined the "Turbo-Hybrid" era which comes from the use of a hybrid engine along with turbos. This era began in 2014 and has only just ended in 2021 to make way for a new era in the sport. Furthermore, most contracts for drivers range between 1-5 years and many young drivers don't make it past 3-4 years in the sport.
 
-Furthermore, most contracts for drivers range between 1-5 years and many young drivers don't make it past 3-4 years in the sport. We decided to take data from 2018 to 2021 to build our model and make an applicable equivalency to a typical contract length and to keep similar drivers and teams.
+With this in mind we decided to utilize data from 2018 to 2021 to build our model and make an applicable equivalency to a typical contract length and to keep similar drivers and teams.
 
 #INSERT PARETO OF DRIVERS AND TEAMS
 
@@ -239,11 +239,11 @@ In gradient boost, the top variables were grid, qualifying_dif, Track.Temp, and 
 
 # PURPOSE 2 ANALYSIS (Type below this line and I will type above it.
 
-To analyze the variable importance and coefficients found within Teams, which have very similar cars, and for Individuals. In other words... what factors have a higher importance for each team/individual? Is this a positive or negative correlation?
+To analyze the variable importance and coefficients found within Teams, which have very similar cars, and for Individuals. What factors could be correlated to the cars performance, good or bad? What about individual Driver?
 
 ## Method
 
-For each team/individual a random forest model will be used to assess Variable Importance. Secondly, a Logistic Regression model will be used to analyze coefficients. Teams were chosen so that the greatest number of data points were available where both team members remained the same. Individuals were chosen so that the greatest number of data points were available in which the team remained the same. The specific classification group (Win-Loss / Podium - Not / Top 6 - Not) that will be chosen for each team/individual will be based upon the highest Specificity & Sensitivity. We will not be analyzing one team against another, or one individual against another. Instead we will be focusing on the classification that provides the best approach to understanding that specific team/individual in question.
+For each ind/team a random forest model will be used to assess Variable Importance. Secondly, a Logistic Regression model will be used to analyze coefficients. The classification (Win, Top3, Top6) chosen for each individual/team had the highest specificity/sensitivity. Since these are independent models, we chose the classification that best represented each ind/team.
 
 ## TEAMS
 
@@ -261,7 +261,13 @@ For each team/individual a random forest model will be used to assess Variable I
 
 ![](http://127.0.0.1:10218/graphics/b5bc5622-e0df-46f5-baf6-c39066ad67f2.png)
 
-INDIVIDUALS
+### Insights (Teams):
+
+The most notable insight between Ferrari and Mercedes is the Variable Importance of Driver Reference. On Mercedes the most valuable node is if the Driver is Lewis Hamilton or not. Secondly, we see that this is a positive coefficient from our Logit model with a high P-value represented by the \*\*\*. On the other hand, Driver Reference for Ferrari had the lowest Variable Importance and did not show any significance in our Ferrari W/L Logit model. What this indicates is that when the "car" is accounted for Lewis Hamilton is showing why he is paid the highest amount in the league. Another Insight to be gained, is the importance of environmental factors (Wind Speed, Track Temp, Weather) on the Ferrari team. As these environmental factors increase we see a negative correlation within our Ferrari Logit Coefficients. However, these coefficients do not have a high P-value and they must be taken with some caution. On the other hand, Mercedes is not as susceptible to environmental factors.
+
+------------------------------------------------------------------------------------------------------------------------------------------
+
+## INDIVIDUALS
 
 | Individual     | Years                  | Team     | Sample Size |
 |----------------|------------------------|----------|-------------|
@@ -269,4 +275,16 @@ INDIVIDUALS
 | Max Verstappen | 2018,2019,2020, & 2021 | Red Bull | 69          |
 | Hamilton       | 2018,2019,2020, & 2021 | Mercedes | 84          |
 
+![](http://127.0.0.1:10218/graphics/45b6f359-39c5-494b-aeb1-0cda9dc1ddf5.png)
+
+![](http://127.0.0.1:10218/graphics/556f817b-5cda-471f-ba0a-713846a5cdc2.png)
+
 ## ![](http://127.0.0.1:10218/graphics/85d0ea65-2d55-44f7-bbc7-a2dd3dfea9f4.png){width="689"}
+
+### Insights (Individuals):
+
+One notable insight from our individual racer models is the Importance of Team Rank for Hamilton and lack there of for Bottas. Keep in mind these two racers have been on the same team for the last four years. With that said, it might be plausible that the Team Rank variable (How well the "Car" qualified) would indicate similar Importance for the two. If the overall Qualifying rank for the team is lower, insinuating a better environmental fit for the Mercedes car, then both Bottas & Hamilton might see a positive correlation. However, this isn't true for Bottas. This could be a further indication of Lewis Hamilton's ability to overcome environmental factors and only have the machine and himself to account for any mistakes.
+
+### Purpose 2 Conclusion:
+
+Each driver and each team have different Variable Importance factors and correlation. It can be difficult to dive further into this with such small sample sizes, but nonetheless we can abstract a few valuable insights.
