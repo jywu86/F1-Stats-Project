@@ -61,23 +61,23 @@ data. Not all data was used to create the models and a summary of the
 data used is listed below. Additionally, enhancements to some of the
 data was used to further enrich additional variables for data modeling.
 
-+----------------+----------------+------------------------------+
-| Dataset Name   | Description    | Additional Enhancements      |
-+================+================+==============================+
-| qualifying     | Summary of     | Track Temp, Air Temp, Wind   |
-|                | qualifying     | Speed was added via python   |
-|                | session for    | package FastF1               |
-|                | each race.     |                              |
-|                | Data included  |                              |
-|                | all session    |                              |
-|                | times          |                              |
-+----------------+----------------+------------------------------+
-| results        | Summary of     | Air Temp, Track Temp, Wind   |
-|                | race results   | Speed, Weather, Car          |
-|                | per driver and | Performance Metric, Fastest  |
-|                | team           | Lap was found per driver,    |
-|                |                | Turns, Sharp Turns,          |
-+----------------+----------------+------------------------------+
++----------------+----------------+-----------------------------+
+| Dataset Name   | Description    | Additional Enhancements     |
++================+================+=============================+
+| qualifying     | Summary of     | Track Temp, Air Temp, Wind  |
+|                | qualifying     | Speed was added via python  |
+|                | session for    | package FastF1              |
+|                | each race.     |                             |
+|                | Data included  |                             |
+|                | all session    |                             |
+|                | times          |                             |
++----------------+----------------+-----------------------------+
+| results        | Summary of     | Air Temp, Track Temp, Wind  |
+|                | race results   | Speed, Weather, Car         |
+|                | per driver and | Performance Metric, Fastest |
+|                | team           | Lap was found per driver,   |
+|                |                | Turns, Sharp Turns,         |
++----------------+----------------+-----------------------------+
 
 ## Data Assumptions and Wrangling
 
@@ -177,27 +177,27 @@ With the following thresholds, we then ran the models with a 60/40 split
 with cross validation of 5 folds and found the following accuracy,
 specificity, and sensitivity on the test data.
 
-+--------------+--------------+--------------+--------------+
-| Model Type   | Accuracy     | Sensitivity  | Specificity  |
-|              |              | (Win Class)  | (Lose Class) |
-|              | (95% CI)     |              |              |
-+==============+==============+==============+==============+
-| Logistic     | 77.7%        | 91.6%        | 75.8%        |
-| Regression   |              |              |              |
-| (Threshold   | (72.6%,      |              |              |
-| \> 0.1)      | 82.3%)       |              |              |
-+--------------+--------------+--------------+--------------+
-| Random       | 79.5%        | 86.1%        | 78.5%        |
-| Forest       |              |              |              |
-| (Threshold   | (74.4%,      |              |              |
-| \>0.1)       | 83.9%)       |              |              |
-+--------------+--------------+--------------+--------------+
-| Extreme      | 75.1%        | 88.9%        | 73.2%        |
-| Gradient     |              |              |              |
-| Boost        | (69.8%,      |              |              |
-| (Threshold   | 80.0%)       |              |              |
-| \>0.05)      |              |              |              |
-+--------------+--------------+--------------+--------------+
++-------------+-------------+-------------+-------------+
+| Model Type  | Accuracy    | Sensitivity | Specificity |
+|             |             | (Win Class) | (Lose       |
+|             | (95% CI)    |             | Class)      |
++=============+=============+=============+=============+
+| Logistic    | 77.7%       | 91.6%       | 75.8%       |
+| Regression  |             |             |             |
+| (Threshold  | (72.6%,     |             |             |
+| \> 0.1)     | 82.3%)      |             |             |
++-------------+-------------+-------------+-------------+
+| Random      | 79.5%       | 86.1%       | 78.5%       |
+| Forest      |             |             |             |
+| (Threshold  | (74.4%,     |             |             |
+| \>0.1)      | 83.9%)      |             |             |
++-------------+-------------+-------------+-------------+
+| Extreme     | 75.1%       | 88.9%       | 73.2%       |
+| Gradient    |             |             |             |
+| Boost       | (69.8%,     |             |             |
+| (Threshold  | 80.0%)      |             |             |
+| \>0.05)     |             |             |             |
++-------------+-------------+-------------+-------------+
 
 : Accuracy Scores for Classification Models (Race Wins)
 
@@ -215,11 +215,11 @@ will leave only top importance variables.
 
 #### Win Model:
 
-Using the stepAIC function to tune our logistic model
-revealed that the two variables with the most amount of importance was
-"Grid" and "driverRef". The sensitivity score from this model was 88.9%
-and had a specificity score of 74.0%. A summary of the winning model is
-shown below:
+Using the stepAIC function to tune our logistic model revealed that the
+two variables with the most amount of importance was "Grid" and
+"driverRef". The sensitivity score from this model was 88.9% and had a
+specificity score of 74.0%. A summary of the winning model is shown
+below:
 
 ```{r, echo=FALSE, message=FALSE}
 log_win_model <- readRDS('log_win_model.rds')
@@ -273,33 +273,33 @@ We ran the same analysis for podium finishes with the following model
 assessments with ROC curves to find the best thresholds and AUCs.
 
 ![ROC Podium Classification
-Models](Figures/ROC%20Podium.jpeg){width="7.4in"}
-The AUC for all models
+Models](Figures/ROC%20Podium.jpeg){width="7.4in"} The AUC for all models
 were comparable with the Logistic model showing the highest AUC. The
 same 60/40 split was performed and 5 fold cross validation for both the
 Random Forest and Gradient Boost models.
 
-+-------------+-------------+-------------+-------------+
-| Model Type  | Accuracy    | Sensitivity | Specificity |
-|             |             | (Podium)    | (Not        |
-|             | (95% CI)    |             | Podium)     |
-+=============+=============+=============+=============+
-| Logistic    | 80.8%       | 93.9%       | 74.2%       |
-| Regression  |             |             |             |
-| (Threshold  | (75.9%,     |             |             |
-| \> 0.2)     | 85.1%)      |             |             |
-+-------------+-------------+-------------+-------------+
-| Random      | 81.5%       | 97.0%       | 73.7%       |
-| Forest      |             |             |             |
-| (Threshold  | (76.7%,     |             |             |
-| \> 0.2)     | 85.7%)      |             |             |
-+-------------+-------------+-------------+-------------+
-| Gradient    | 76.7%       | 97.9%       | 66.6%       |
-| Boost       |             |             |             |
-| (Threshold  | (           |             |             |
-| \> 0.1)     | 7           |             |             |
-|             | 1.5%,81.5%) |             |             |
-+-------------+-------------+-------------+-------------+
++------------+------------+------------+------------+
+| Model Type | Accuracy   | S          | S          |
+|            |            | ensitivity | pecificity |
+|            | (95% CI)   | (Podium)   | (Not       |
+|            |            |            | Podium)    |
++============+============+============+============+
+| Logistic   | 80.8%      | 93.9%      | 74.2%      |
+| Regression |            |            |            |
+| (Threshold | (75.9%,    |            |            |
+| \> 0.2)    | 85.1%)     |            |            |
++------------+------------+------------+------------+
+| Random     | 81.5%      | 97.0%      | 73.7%      |
+| Forest     |            |            |            |
+| (Threshold | (76.7%,    |            |            |
+| \> 0.2)    | 85.7%)     |            |            |
++------------+------------+------------+------------+
+| Gradient   | 76.7%      | 97.9%      | 66.6%      |
+| Boost      |            |            |            |
+| (Threshold | ( 7        |            |            |
+| \> 0.1)    | 1          |            |            |
+|            | .5%,81.5%) |            |            |
++------------+------------+------------+------------+
 
 Although the Boost model had the highest sensitivity parameter, the
 accuracy for that model is the weakest out of the 3 with a confidence
@@ -317,7 +317,8 @@ therefore are not good models for exploration. However due to logistic
 regression's ability to show coefficients, we will explore the logistic
 model to look at specificity for podium spots.
 
-![Variable Importance Podium](Figures/VarImp%20(Podium)%20Forest.jpeg){width="4in"}
+![Variable Importance
+Podium](Figures/VarImp%20(Podium)%20Forest.jpeg){width="4in"}
 
 The overall model showed high importance on grid, qualifying_dif (car
 performance), and driver and marginal importance on Type(track type) and
@@ -377,26 +378,27 @@ Classification](Figures/ROC%20Backmarker.jpeg){width="7.4in"}
 Again logistic regression had the highest AUC and the gradient boost was
 able to provide the highest sensitivity.
 
-+-------------+-------------+-------------+-------------+
-| Model Type  | Accuracy    | Sensitivity | Specificity |
-|             |             | (Podium)    | (Not        |
-|             | (95% CI)    |             | Podium)     |
-+=============+=============+=============+=============+
-| Logistic    | 82.5%       | 85.4%       | 79.0%       |
-| Regression  |             |             |             |
-| (Threshold  | (77.7%,     |             |             |
-| \> 0.5)     | 86.6%)      |             |             |
-+-------------+-------------+-------------+-------------+
-| Random      | 82.2%       | 82.3%       | 82.0%       |
-| Forest      |             |             |             |
-| (Threshold  | (77.3%,     |             |             |
-| \> 0.6)     | 86.3%)      |             |             |
-+-------------+-------------+-------------+-------------+
-| Gradient    | 82.5%       | 86.0%       | 78.2%       |
-| Boost       |             |             |             |
-| (Threshold  | (77.7%,     |             |             |
-| \> 0.6)     | 86.6%)      |             |             |
-+-------------+-------------+-------------+-------------+
++------------+------------+------------+------------+
+| Model Type | Accuracy   | S          | S          |
+|            |            | ensitivity | pecificity |
+|            | (95% CI)   | (Podium)   | (Not       |
+|            |            |            | Podium)    |
++============+============+============+============+
+| Logistic   | 82.5%      | 85.4%      | 79.0%      |
+| Regression |            |            |            |
+| (Threshold | (77.7%,    |            |            |
+| \> 0.5)    | 86.6%)     |            |            |
++------------+------------+------------+------------+
+| Random     | 82.2%      | 82.3%      | 82.0%      |
+| Forest     |            |            |            |
+| (Threshold | (77.3%,    |            |            |
+| \> 0.6)    | 86.3%)     |            |            |
++------------+------------+------------+------------+
+| Gradient   | 82.5%      | 86.0%      | 78.2%      |
+| Boost      |            |            |            |
+| (Threshold | (77.7%,    |            |            |
+| \> 0.6)    | 86.6%)     |            |            |
++------------+------------+------------+------------+
 
 Comparing the 3 models, the logistic regression had the highest AUC and
 all were above 90%. In terms of sensitivity, Gradient Boost gave the
@@ -408,7 +410,10 @@ while maintaining optimal accuracy, however was unable to get a better
 model than the default settings. The tuning parameter charts are found
 in the appendix.
 
-Trying to optimize our boost model gave us a worse performing model with respect to Sensitivity (80.8%), indicating potential overfitting issues.  As a result, the original gradient model was used to explain the top 6 finishes.  
+Trying to optimize our boost model gave us a worse performing model with
+respect to Sensitivity (80.8%), indicating potential overfitting issues.
+As a result, the original gradient model was used to explain the top 6
+finishes.
 
 ![Variable Importance for Top 6
 Model](Figures/Backmarker%20Model%20Imp.jpeg){width="3.8in"}
@@ -498,7 +503,7 @@ understand. Formula 1 is an exciting sport with a lot of interconnected
 variables. This project's purpose was to shed some light on potential
 factors that may matter more than others.
 
-## PURPOSE 2 
+## PURPOSE 2
 
 As seen in purpose 1, the influence of strategy and car are extremely
 significant when predicting race outcomes. It can be difficult to
@@ -656,7 +661,11 @@ of pit stops and tire selection, car reliability, etc. As our own team,
 we hope to continue to build on this project by incorporating additional
 models that take into more of these specific details.
 
-Appendix
+## Appendix
+
+### Boost Model Tuning Parameters
+
+![](Figures/XgBoost%20Tuning%20Ensemble.jpg)
 
 ```{r eval=FALSE}
 
