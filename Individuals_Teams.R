@@ -107,12 +107,12 @@ stepAIC(f_m_w_log)
 f_m_w_log2 <- train.glm(finish_tier~ grid+driverRef,data=train_pod_f_t_w,method='glm.fit')
 summary(f_m_w_log2)
 
-
+dev.off()
 f_m_w2 <- multiclass.roc(test_pod_f_t_w$finish_tier,f_m_w_log_pred$prediction[,'Win'], percent=TRUE)
 f_m_w2  <- f_m_w2[['rocs']]
 f_m_w2  <-f_m_w2[[1]]
-
-roc1<- plot.roc(f_m_w,
+par(mfrow=c(2,2))
+roc1 <- plot.roc(f_m_w,
          print.auc = T,
          auc.polygon = T,
          max.auc.polygon = T,
@@ -146,7 +146,7 @@ roc2 <- plot.roc(f_m_w2,
          cex.main=1.5,
          cex.lab=1.3)
 set_theme(axis.textsize.y = 1.3,axis.textcolor.y = "Black",title.size = 2)
-pm <- plot_model(f_m_w_log,show.values=TRUE,transform = NULL,ci.lvl=NA,title='Ferrari Logit Coefficients',dot.size=3,value.size=5)
+pm <- plot_model(f_m_w_log,show.values=TRUE,transform = NULL,ci.lvl=NA,title='Ferrari Logit Coefficients',dot.size=1,value.size=5)
 levels(pm$data$term)<- c('Sharp Turns/Mi','Rained','Track Temp','Wind Speed','Driver Vettel','Grid')
 pm
 ###########
@@ -199,7 +199,7 @@ roc4 <- plot.roc(m_m_rocw,
          print.thres.cex = 1.5,
          cex.main=1.5,
          cex.lab=1.3)
-pm2 <- plot_model(m_m_w_log,show.values=TRUE,transform = NULL,ci.lvl=NA,title='Mercedes Logit Coefficients',dot.size=3,value.size=5)
+pm2 <- plot_model(m_m_w_log,show.values=TRUE,transform = NULL,ci.lvl=NA,title='Mercedes Logit Coefficients',dot.size=1,value.size=5)
 levels(pm2$data$term)<- c('Sharp Turns/Mi','Rained','Driver Hamilton','Wind Speed','Track Temp','Grid')
 pm2
 labels2 <- c('Grid','Track Temp','Wind Speed','Driver Hamilton','Rained','Sharp Turns/Mi')
