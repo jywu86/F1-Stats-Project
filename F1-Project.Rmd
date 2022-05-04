@@ -3,7 +3,6 @@ title: "F1 Project (E109"
 author: "John Wu and Scotty Smith"
 date: "4/22/2022"
 output:
-  pdf_document: default
   html_document: default
   word_document: default
 ---
