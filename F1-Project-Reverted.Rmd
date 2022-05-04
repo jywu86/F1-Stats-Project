@@ -1,0 +1,1565 @@
+---
+title: "F1 Project (E109"
+author: "John Wu and Scotty Smith"
+date: "4/22/2022"
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+# Background and Purpose
+
+Formula 1 also known as F1 is a series of races (Grand Prix) is a
+globally recognized sport and is one of the fastest growing sports in
+the United States. The sport has been around since the early 1950s and
+is considered as the pinnacle of motorsport. To be the F1 world champion
+is synonymous with being the absolute best. Each year a driver and a
+team (also known as constructor) is awarded a championship based on the
+points won each season.
+
+Unlike other major sports in the United States such as the NBA where
+sixty rookies enter the league each year; opportunities in F1 are rare.
+There are a total of 20 "seats" across all of Formula 1 and in 2022,
+only one rookie was given a Formula 1 seat. The average career in
+Formula 1 is about 8 seasons. With such small opportunities and sample
+sizes, teams are left with the hard choice of either locking up a former
+world champion for a high amount or risk giving a chance to a newbie or
+average driver for 3-4 years on a contract.
+
+There is a common saying that there is F1 and then there is F1.5. This
+is referring to the large gap in performance between the top two or
+three teams in a given season and the rest of the field. This
+discrepancy is due to the difference in budgets between the top teams
+(approximately \$485 million per year) and the back marker teams (\$145
+million per year). As small teams have to rely heavily on sponsors to
+continue with the added pressure of performing to appease the said
+sponsors.
+
+The purpose of this project is to use classification models to
+understand the effect of which factors are the most important for
+top-tier, mid-pack (best of the rest), and low-tier (AKA backmarkers)
+and what would be an ideal strategy for each team aiming to move from
+each tier. Also to answer the question of how well does each driver rank
+within their team as a way of comparing individual driver ability.
+
+# The Data
+
+The data used for this project was a mixture of a public dataset from
+Kaggle
+(<https://www.kaggle.com/datasets/rohanrao/formula-1-world-championship-1950-2020>)
+with further enrichment from a package FastF1
+(<https://theoehrly.github.io/Fast-F1/>).
+
+This data was broken down into multiple sheets with cross referenced ids
+and had data available for races from 1950 to 2020. The sheets are
+broken down into mainly two types of data: reference data and result
+data. Not all data was used to create the models and a summary of the
+data used is listed below. Additionally, enhancements to some of the
+data was used to further enrich additional variables for data modeling.
+
++----------------+-----------------+--------------------------------+
+| Dataset Name   | Description     | Additional Enhancements        |
++================+=================+================================+
+| qualifying     | Summary of      | Track Temp, Air Temp, Wind     |
+|                | qualifying      | Speed was added via python     |
+|                | session for     | package FastF1                 |
+|                | each race. Data |                                |
+|                | included all    |                                |
+|                | session times   |                                |
++----------------+-----------------+--------------------------------+
+| results        | Summary of race | Air Temp, Track Temp, Wind     |
+|                | results per     | Speed, Weather, Car            |
+|                | driver and team | Performance Metric, Fastest    |
+|                |                 | Lap was found per driver,      |
+|                |                 | Turns, Sharp Turns,            |
++----------------+-----------------+--------------------------------+
+
+## Data Assumptions and Wrangling
+
+The majority of the data provided and extracted are categorical
+variables. The results of each race and amount of each race is a
+discrete distribution. However, the variables within each category are
+assumed to be normally distributed (average speed, lap times,
+temperature of environment, etc.).
+
+In the original dataset, there were 4 explanatory variables available to
+model our classification models. (grid, circuit, driver, fastest_speed)
+Our concern was the lack of additional variables given to us to produce
+models with different combination of variables. Therefore, a large
+effort was made to create additional variables such as Air.Temp,
+Track.Temp, Wind.Speed, Weather, Race.Circuit type (street or racing
+circuit), n_of_Sharp_Turns, car_performance, track_type based on speed,
+and turns per mile. We normalized car performance data by using the
+qualifying times of each team and comparing the difference in time of
+each team against the fastest team of the qualifying session.
+
+Lastly, due to the nature of the data there is some existence of
+dependencies with certain variables such as car performance, driver
+performance, and grid order. In our models we viewed each as a system of
+variables that describes a certain feature. (i.e grid is the location of
+the each racer relative to each other, car performance is the pure
+performance of a car by averaging two drivers, and driver's racecraft
+such as maneuvering, blocking, and/or ability to read situations). We
+also assume that all environmental variables are equal for all drivers
+during the time of the race and affect drivers equally. In reality, car
+set-ups have some effects on these and will affect each car differently.
+
+## Data Selection
+
+Formula 1 as a sport has changed drastically over the years and is
+broken down into separate eras of similar cars based on their
+technology. We would like to compare as similar of cars as possible so
+the era chosen was the most recent era called the "Turbo-Hybrid" era
+which comes from the use of a hybrid engine along with turbos and
+occurred between 2014 to 2021 which is the subset of our analysis.
+
+Furthermore, most contracts for drivers range between 1-5 years and many
+young drivers don't make it past 3-4 years in the sport. We decided to
+take data from 2018 to 2021 to build our model and make an applicable
+equivalency to a typical contract length and to keep similar drivers and
+teams.
+
+Additionally, we omitted races where a driver had to retire and was not
+able to complete the race. In racing, these could be a result of a
+collision, mechanical issue, or illness.
+
+![Total Completed Races by
+Driver](Figures/Completed%20Races%20(Pareto).jpeg){width="6in"}
+
+Throughout the four years, there were 32 total drivers that participated
+in at least 1 formula one race. There were many drivers that had less
+than 40 races and many did not have race data in one of the four years.
+We chose to go after the top 10 drivers with completed races in an
+effort to limit the driver variables and to limit the amount of
+incomplete data in the dataset. These drivers were Hamilton, Vettel,
+Bottas, Perez, Sainz, Rakkonen, Gasly, Stroll, Leclerc, and Verstappen.
+
+# Purpose 1
+
+To understand the differences between top, mid-tier, and backmarkers, we
+decided to run classification models for 3 different types of race
+results. In our first analysis, we looked at classification models to
+predict race wins.
+
+### Race Wins:
+
+To find the best classification model, we decided to run 3 different
+types of models: logistic regression, random forest, and XgBoost. One
+issue with classifying race wins is that the "Win" positive class is
+extremely small when compared with the "Lose" category. In the 81 races,
+there is a proportion of 5% (1 in 20 average) in the Win class and 95%
+in the Lose class. Therefore, to evaluate our model we will be heavily
+relying on the sensitivity accuracy.
+
+We used ROC curves based on test data to give us an overview with
+default parameters to find the optimal threshold for each model and
+looked at the overall accuracy, specificity, and sensitivity (with "Win"
+as the positive class) for all three models.
+
+![ROC for Win Classification
+Models](Figures/ROC%20Curve%20for%20Win%20Lose.jpeg){width="4.8in"}
+
+Overall, it appears that all models were comparable with the Boost model
+having a slightly higher AUC. For our analysis, we are primarily
+interested in the "Win" prediction and what factors are important to
+achieve this result. Therefore, setting the threshold to 0.1 for both
+Logistic and Forest models looked to give us the best overall score and
+highest specificity score and setting the threshold value to 0.05
+appeared to be the best threshold for the boost model.
+
+With the following thresholds, we then ran the models with a 60/40 split
+with cross validation of 5 folds and found the following accuracy,
+specificity, and sensitivity on the test data.
+
++------------------+--------------+--------------+--------------+
+| Model Type       | Accuracy     | Sensitivity  | Specificity  |
+|                  |              | (Win Class)  | (Lose Class) |
+|                  | (95% CI)     |              |              |
++==================+==============+==============+==============+
+| Logistic         | 77.7%        | 91.6%        | 75.8%        |
+| Regression       |              |              |              |
+| (Threshold \>    | (72.6%,      |              |              |
+| 0.1)             | 82.3%)       |              |              |
++------------------+--------------+--------------+--------------+
+| Random Forest    | 79.5%        | 86.1%        | 78.5%        |
+| (Threshold       |              |              |              |
+| \>0.1)           | (74.4%,      |              |              |
+|                  | 83.9%)       |              |              |
++------------------+--------------+--------------+--------------+
+| Extreme Gradient | 75.1%        | 88.9%        | 73.2%        |
+| Boost (Threshold |              |              |              |
+| \>0.05)          | (69.8%,      |              |              |
+|                  | 80.0%)       |              |              |
++------------------+--------------+--------------+--------------+
+
+: Accuracy Scores for Classification Models (Race Wins)
+
+Comparing across all 3 models, it appears that the Logistic Regression
+model performed the best when it came to fitting against the Win class
+and the Random Forest model gave slightly better predictions against the
+Lose class. All three accuracy scores are within the 95% confidence
+intervals between each other and therefore the model accuracy is
+similar. In the analysis below, we will use the Logistic Regression
+model to explain our race win data and the Random Forest Model to
+explain our lose data. While performing the analysis below, we will
+attempt to improve our model further through the use of stepAIC to limit
+siginificant variables in our logistic model and in the Random Forest we
+will leave only top importance variables.
+
+#### Win Model:
+
+Using the stepAIC function to tune our logistic model revealed that the
+two variables with the most amount of importance was "Grid" and
+"driverRef". The sensitivity score from this model was 88.9% and had a
+specificity score of 74.0%. A breakdown of the following coefficients
+are shown below:
+
+| Variable                                              | Coefficients |
+|-------------------------------------------------------|--------------|
+| Grid - Order in which drivers line up before the race | -0.417       |
+| Hamilton (Driver)                                     | 2.4107       |
+| Max_Verstappen (Driver)                               | 1.5088       |
+| Vettel (Driver)                                       | 0.5895       |
+| Leclerc (Driver)                                      | 0.3154       |
+| Raikkonen (Driver)                                    | -0.1053      |
+| Perez (Driver)                                        | -0.4409      |
+| Stroll (Driver)                                       | -15.0108     |
+| Sainz (Driver)                                        | -16.0613     |
+| Gasly (Driver)                                        | -16.1000     |
+| Bottas(Driver)                                        | Reference    |
+
+: Logistic Regression (driverRef, grid) Coefficients (Win-Class)
+
+The reference driver used in this model was Bottas and a brief look at
+these coefficients shows that the top drivers (Hamilton and Verstappen)
+have an exceedingly high effect on the potential for a race win than
+compared with the reference driver. Both of these drivers stayed on the
+same team for all of the four years and were involved in the top team
+(Mercedes and Red Bull) with the most amount of wins. This model
+reflects that result heavily.
+
+When looking at the top three drivers (Hamilton, Verstappen, and Vettel)
+seem to be able to outweigh the negative effect of a one or two bad grid
+units. Hamilton appears to erase almost 6 grid units and Max with 3 when
+compared with Bottas.
+
+![Driver Wins from 2018 -
+2021](Figures/Driver_Win_Pareto.jpg){width="5in"}
+
+The more interesting points come from drivers such as Raikkonen, Vettel,
+Leclerc, and Perez (Mid-tier drivers). These drivers have switched teams
+and moved from top teams to middle/backmarker teams throughout their
+career. During this period, Leclerc specifically seems to stand out as
+he secured 2 wins in the 2019 season which is similar to Perez, but has
+a much larger positive influence on race wins probability. On the
+opposite spectrum, it appears that Gasly has a much lower influence than
+his surrounding drivers and significantly lower than Raikkonen, Perez,
+or Leclerc even though they've had similar number of wins.
+
+A note of reference is that when drivers stay on the same team for all 4
+years it is difficult to separate their performance and the performance
+of the car. One way to compare is to look at drivers and their
+teammates. The reference driver was Bottas which has also been on the
+Mercedes team for all 4 years, however when comparing his coefficient;
+it appears that Hamilton has a significant weight over his teammate when
+it comes to race wins.
+
+### Podium Finish (Top 3)
+
+We ran the same analysis for podium finishes with the following model
+assessments with ROC curves to find the best thresholds and AUCs.
+
+![ROC for podium classification
+models](Figures/ROC%20Curve%20for%20Podium%20Models.jpeg){width="4.8in"}
+
+The AUC for all models were comparable with the Logistic model showing
+the highest AUC. The same 60/40 split was performed and 5 fold cross
+validation for both the Random Forest and Gradient Boost models.
+
++-----------------+--------------+--------------+--------------+
+| Model Type      | Accuracy     | Sensitivity  | Specificity  |
+|                 |              | (Podium)     | (Not Podium) |
+|                 | (95% CI)     |              |              |
++=================+==============+==============+==============+
+| Logistic        | 80.8%        | 93.9%        | 74.2%        |
+| Regression      |              |              |              |
+| (Threshold \>   | (75.9%,      |              |              |
+| 0.2)            | 85.1%)       |              |              |
++-----------------+--------------+--------------+--------------+
+| Random Forest   | 81.5%        | 97.0%        | 73.7%        |
+| (Threshold \>   |              |              |              |
+| 0.2)            | (76.7%,      |              |              |
+|                 | 85.7%)       |              |              |
++-----------------+--------------+--------------+--------------+
+| Gradient Boost  | 76.7%        | 97.9%        | 66.6%        |
+| (Threshold \>   |              |              |              |
+| 0.1)            | (            |              |              |
+|                 | 71.5%,81.5%) |              |              |
++-----------------+--------------+--------------+--------------+
+
+Although the Boost model had the highest sensitivity parameter, the
+accuracy for that model is the weakest out of the 3 with a confidence
+interval that does not overlap either of the two models. The Random
+Forest Model showed a very high sensitivity at a threshold of 0.2 with
+an overall higher accuracy throughout across all three models. The
+specificity in the logistic regression is slightly higher with
+comparable accuracy to the Random Forest Model.
+
+In the analysis below, we used the Random Forest Model to explain
+differences in gaining podium places and removed less important features
+to try to generalize and get a better sensitivity. All three models
+showed relatively weak specificity compared to their sensitivity and
+therefore are not good models for exploration. However due to logistic
+regression's ability to show coefficients, we will explore the logistic
+model to look at specificity for podium spots.
+
+#### Podium Finish
+
+The overall model showed high importance on grid, qualifying_dif (car
+performance), and driver and marginal importance on Type(track type) and
+track distance (mile). After cycling through a variety of these
+elements, the model that improved overall accuracy while keeping the
+relatively high sensitivity was based on the grid, driver, car
+performance, track type, and distance.
+
+![Variable Importance for Podium
+Places](Figures/VarImp%20(Podium)%20Forest.jpeg){width="3.8in"}
+
+The most important variables for determining podium places were grid and
+car performance. More interesting results come from looking at the
+drivers and their relative rank of importance with each other. Max
+appears to have an ever slight higher importance than Hamilton when it
+comes to gaining podiums. Perez, Gasly, and Sainz are all in a
+comparable group. Without completely understanding the coefficients, it
+is hard to discern if these drivers had positive effects or negative.
+
+To gain insights into the magnitude and direction of each variable, we
+passed the most important variables based on the Random Forest into a
+logistic regression model and got the following coefficients.
+
+| Variable                         | Coefficient |
+|----------------------------------|-------------|
+| Verstappen (driver)              | 1.4388      |
+| Hamilton (driver)                | 0.9613      |
+| Vettel (driver)                  | -0.2160     |
+| Raikkonen (driver)               | -0.4954     |
+| Sainz (driver)                   | -0.6929     |
+| Gasly (driver)                   | -0.7250     |
+| Leclerc (driver)                 | -0.7586     |
+| Stroll (driver)                  | -1.0674     |
+| Perez (driver)                   | -1.1211     |
+| grid                             | -0.3232     |
+| qualifying_dif (car performance) | -79.6861    |
+| Bottas                           | Reference   |
+
+: Coefficients of Logistic Model (Podium Finish)
+
+Looking at the coefficients below, only Verstappen and Hamilton have
+favorable coefficients against Bottas. Additionally, Leclerc appears to
+belong to the mid-tier drivers when it comes to getting podiums. And
+when compared to his actual podium amounts is severely underperforming
+and only outperforming Perez which has lowest coefficient of all
+drivers. Perez is especially surprising as in the Random Forest Model,
+his importance was grouped together with Gasly, and Sainz. Raikkonen
+seems to also perform well in the logistic model splitting the
+difference between Vettel (4th highest podium counts) and Sainz.
+
+The large difference between Hamilton and Bottas is surprising as these
+two drivers were teammates throughout the entire 4 year period and
+highlights Hamilton's dominance throughout this period. ![Podiums by
+Driver (2018-2021)](Figures/Podiums%20by%20Driver.jpeg){width="4.3in"}
+
+Overall from our models, to achieve a podium the important factors are
+grid position and car performance. Similar to Race Wins, the
+environmental variables are more significant with lower tiered teams
+such as teams that Gasly, Stroll, and Perez belong to. The standout in
+this group of drivers would be Sainz as he has shown to have be
+important in both the logistic and Random Forest model.
+
+### Avoiding the BackMarkers (Rank 1-6)
+
+Similarly, we looked at all three types of classification models and
+performed a ROC analysis to find the best thresholds and compare AUCs.
+
+![ROC for Top Teams Classification
+Models](Figures/ROC%20for%20Top%206%20Models.jpeg){width="4.5in"}
+
+Again logistic regression had the highest AUC and the gradient boost was
+able to provide the highest sensitivity.
+
++-----------------+--------------+--------------+--------------+
+| Model Type      | Accuracy     | Sensitivity  | Specificity  |
+|                 |              | (Podium)     | (Not Podium) |
+|                 | (95% CI)     |              |              |
++=================+==============+==============+==============+
+| Logistic        | 82.5%        | 85.4%        | 79.0%        |
+| Regression      |              |              |              |
+| (Threshold \>   | (77.7%,      |              |              |
+| 0.5)            | 86.6%)       |              |              |
++-----------------+--------------+--------------+--------------+
+| Random Forest   | 82.2%        | 82.3%        | 82.0%        |
+| (Threshold \>   |              |              |              |
+| 0.6)            | (77.3%,      |              |              |
+|                 | 86.3%)       |              |              |
++-----------------+--------------+--------------+--------------+
+| Gradient Boost  | 82.5%        | 86.0%        | 78.2%        |
+| (Threshold \>   |              |              |              |
+| 0.6)            | (77.7%,      |              |              |
+|                 | 86.6%)       |              |              |
++-----------------+--------------+--------------+--------------+
+
+Comparing the 3 models, the logistic regression had the highest AUC and
+all were above 90%. In terms of sensitivity, Gradient Boost gave the
+higher sensitivity with almost an equal drop in the specificity. The two
+models used to show Top6 and out of Top6 would be Gradient Boost and
+Random Forest. Similar to all analysis previously ran, we tried to tune
+our models to score even higher in either sensitivity or specificity
+while maintaining optimal accuracy, however was unable to get a better
+model than the default settings. The tuning parameter charts are found
+in the appendix.
+
+In gradient boost, the top variables were grid, qualifying_dif,
+Track.Temp, and to a smaller degree drivers. We used these top variables
+to build our model and fine tune the specific parameters surrounding
+XgBoost (rounds, max_depth, learning rate, and gamma loss).
+
+We found that with boosting iterations of 1600, the accuracy was the
+highest; however the first dip in accuracy occurs at a boost iteration
+of 300. To avoid overfitting, we set the boost iteration to 300 for this
+reason. Looking at the max tree depth, significant increase was found
+going from a 7 depth to 10, however for much of the same reason with
+overfitting; we decided to use a max depth of 5 as this is when the
+first plateau is. Our learning rate was set at 0.1 and our Gamma
+function was set to 1 based on the tuning parameters above.
+
+Measuring this model gave us an overall accuracy of 80.8% (Sensitivity -
+81.1%, Specificity - 80.5%) and was comparable in accuracy, but much
+lower in Sensitivity. This shows that there may have be an issue with
+overfitting and the initial model was adopted to explain Top6 finishes.
+
+![Variable Importance for Top 6
+Model](Figures/Backmarker%20Model%20Imp.jpeg){width="3.8in"}
+
+Based on the variable importance on the XgBoost model, the most
+important root node was grid, car performance, and track temperature.
+The first two variables may be obvious as the faster your car, the
+easier it is to get towards the front and also the higher up in the grid
+a driver is placed the more likely they are to defend and keep that
+position. There are certainly relationships between grid, car
+performance, and drivers in specific cars that may be magnifying the
+importance of these variables. These are all prevalent in the two models
+above. However as we move towards the middle, we start to see
+environmental variables become slightly more important than the previous
+podium and race-win models.
+
+![Example of XgBoost
+Tree](Figures/Example%20Decision%20Tree.jpeg){width="5in"}
+
+In fact, when looking at an example tree diagram from the model, it
+appears that having grids at 6 or below was crucial. This may be obvious
+since it's many times easier to defend your position in a race versus
+overtaking potential opponents. As XgBoost is an ensemble model, this
+example is just one tree of many to find the likely probability of a Top
+6 finish. However it is still valuable to see where the trees split and
+the decisions made. For instance, Sainz as a driver has a relative high
+level of importance as it is close to the root nodes. As seen in the
+variable importance chart above, Sainz's importance is close to that of
+Verstappen.
+
+### Conclusion to Purpose 1
+
+By looking at finishes in tiers (Wins, Podiums, Teams), we are able to
+see some obvious relationships. Firstly, grid position appears to be a
+huge portion of importance when it comes to determining all finishes. In
+a real life setting, rid position, car performance, and teams are
+closely related. In cases where drivers stayed with one team for the
+duration of the 4 years, their performances were a lot more consistent
+and from our models, it was harder to separate the driver and the car.
+
+For race wins, it appears that environmental factors are not as
+important as compared to other finishes. The main portions that are
+important is the driver and the position at which they start the race.
+This is evident in the dominance that is seen with Hamilton throughout
+this period with 47 wins out of a possible 81. However, in our model it
+was picked up that LeClerc with his relative lack of race win results
+compared to his rivals might be someone that is outperforming his peers
+with similar outcomes.
+
+For podiums, we see a similar result with the top drivers and a great
+emphasis on the car performance. The difference between winning and
+podiums from our model is that Verstappen is king when it comes to
+podiums. Even though he has less overall podiums than Hamilton, his
+rating for podiums is measurably higher based on our logistic model. Our
+diamond in the rough for podiums appears to be Sainz as he was able to
+show much higher influence while not having as many podium results in
+our dataset.
+
+As we move away from the front of the grid, our models start to show
+that environmental factors start to outweigh some individual drivers.
+For instance, track temp was relatively high as compared to driver
+importance on the back marker models, but was not seen on either Race
+win model or Podium model.
+
+To answer our original question of the factors that surround top teams,
+mid teams, and back markers; if you are a top team manager getting the
+right driver is critical. The difference between Bottas, Hamilton, and
+Max are fairly significant. If you are a mid tier team, your driver
+becomes slightly less important; getting someone like LeClerc where the
+potential to win is relatively high compared to his peers may get you
+towards the front of the pack. If you are on the backmarker, invest in
+your car and technology would be the advise. The environmental variables
+start to matter more in the back and the driver influences are harder to
+discern from each other. However, picking up someone like Sainz would be
+an ideal candidate given that it does not take away budget for
+investment into your car.
+
+However, in reality all Formula 1 teams employ a variety of these
+strategies. Some portions that are not highlighted in this model are how
+well the drivers can develop a car through experience. The different
+strategies employed by each team for each driver is also crucial to
+understand. Formula 1 is an exciting sport with a lot of interconnected
+variables. This project's purpose was to shed some light on potential
+factors that may matter more than others.
+
+# PURPOSE 2 ANALYSIS (Type below this line and I will type above it.
+
+A teammate in F1 is the closest rival because this is the closest
+scenario in which two drivers may be operating equal machinery. The
+second purpose of this project is to evaluate individual drivers and
+their relative values when compared to their teammates.To analyze the
+variable importance and coefficients found within Teams, which have very
+similar cars, and for Individuals. In other words... what factors have a
+higher importance for each team/individual? Is this a positive or
+negative correlation?
+
+To analyze the variable importance and coefficients found within Teams,
+which have very similar cars, and for Individuals. What factors could be
+correlated to the cars performance, good or bad? What about individual
+Driver?
+
+Is Lewis Hamilton really worth \$30 million?
+
+## Method
+
+For each team/individual a random forest model will be used to assess
+Variable Importance. Secondly, a Logistic Regression model will be used
+to analyze coefficients. Teams were chosen so that the greatest number
+of data points were available where both team members remained the same.
+Individuals were chosen so that the greatest number of data points were
+available in which the team remained the same. The specific
+classification group (Win-Loss / Podium - Not / Top 6 - Not) that will
+be chosen for each team/individual will be based upon the highest
+Specificity & Sensitivity. We will not be analyzing one team against
+another, or one individual against another. Instead we will be focusing
+on the classification that provides the best approach to understanding
+that specific team/individual in question. For instance... Perez and
+Stroll do not finish in 1st enough times for the Win-Loss approach to be
+appropriate. On the other hand, Bottas & Hamilton rarely find themselves
+outside of the top 3.
+
+## TEAMS
+
++--------+--------+--------+--------+--------+--------+
+| Team   | Years  | Ind i  | Sample | Classi | AUC    |
+|        |        | v      | Size   | f      | (Se n  |
+|        |        | iduals |        | i      | s      |
+|        |        |        |        | cation | ,Spec) |
++========+========+========+========+========+========+
+| F      | 2      | L      | 113    | Win    | AUC:83 |
+| errari | 018,20 | eclerc |        |        | .      |
+|        | 1      | &      |        |        | 3      |
+|        | 9      | Vettel |        |        | %,(63. |
+|        | ,2020, |        |        |        | 7      |
+|        | & 2021 |        |        |        | %      |
+|        |        |        |        |        | ,100%) |
++--------+--------+--------+--------+--------+--------+
+| M      | 2      | Bottas | 160    | Win    | AUC:   |
+| e      | 018,20 | & H    |        |        | 84. 9  |
+| rcedes | 1      | a      |        |        | %      |
+|        | 9      | milton |        |        | ,(79.3 |
+|        | ,2020, |        |        |        | %      |
+|        | & 2021 |        |        |        | ,      |
+|        |        |        |        |        | 92.3%) |
++--------+--------+--------+--------+--------+--------+
+| Racing | 2 0    | Perez  | 63     | Top 6  | AUC: 7 |
+| Point  | 1      | &      |        |        | 4      |
+|        | 9,2020 | Stroll |        |        | .      |
+|        |        |        |        |        | 2%,(76 |
+|        |        |        |        |        | .      |
+|        |        |        |        |        | 2      |
+|        |        |        |        |        | %,75%) |
++--------+--------+--------+--------+--------+--------+
+
+## INDIVIDUALS
+
+| Individual     | \| Years              | \| Team  | Sample Size |
+|----------------|-----------------------|----------|-------------|
+| Bottas         | 2018,2019,2020,& 2021 | Mercedes | 80          |
+| Vettel         | 2018,2019,& 2020      | Ferrari  | 60          |
+| Max Verstappen | 2018,2019,2020,& 2021 | Red Bull | 80          |
+| Hamilton       | 2018,2019,2020,& 2021 | Mercedes | 80          |
+
+## Method
+
+For each ind/team a random forest model will be used to assess Variable
+Importance. Secondly, a Logistic Regression model will be used to
+analyze coefficients. The Logit Regression models show values that did
+not have low P-Values and futher steps with a StepAIC analysis would
+without doubt remove many of the variables presented in the below
+graphs. These are purposefully kept in, as our purpose with the Logit
+Regression model is to understand whether or not an explanatory variable
+has a negative or positive association. However, variables with a
+significant p-value will be more than insightful. The classification
+(Win, Top3, Top6) chosen for each individual/team had the highest
+specificity/sensitivity. Since these are independent models, we chose
+the classification that best represented each ind/team.
+
+## TEAMS
+
++--------+--------+--------+--------+--------+--------+
+| Team   | Years  | Indiv  | Sample | Cl     | AUC    |
+|        |        | iduals | Size   | assifi | (Se n  |
+|        |        |        |        | cation | s      |
+|        |        |        |        |        | ,Spec) |
++========+========+========+========+========+========+
+| F      | 2      | L      | 113    | Win    | AUC:83 |
+| errari | 018,20 | eclerc |        |        | .      |
+|        | 1      | &      |        |        | 3      |
+|        | 9      | Vettel |        |        | %,(63. |
+|        | ,2020, |        |        |        | 7      |
+|        | & 2021 |        |        |        | %      |
+|        |        |        |        |        | ,100%) |
++--------+--------+--------+--------+--------+--------+
+| Me     | 2      | Bottas | 160    | Win    | AUC:   |
+| rcedes | 018,20 | &      |        |        | 84. 9  |
+|        | 1      | Ha     |        |        | %      |
+|        | 9      | milton |        |        | ,(79.3 |
+|        | ,2020, |        |        |        | %      |
+|        | & 2021 |        |        |        | ,      |
+|        |        |        |        |        | 92.3%) |
++--------+--------+--------+--------+--------+--------+
+| Racing | 2 0    | Perez  | 63     | Top 6  | AUC: 7 |
+| Point  | 1      | &      |        |        | 4      |
+|        | 9,2020 | Stroll |        |        | .      |
+|        |        |        |        |        | 2%,(76 |
+|        |        |        |        |        | .      |
+|        |        |        |        |        | 2      |
+|        |        |        |        |        | %,75%) |
++--------+--------+--------+--------+--------+--------+
+
+## INDIVIDUALS
+
+| Individual     | Years                 | Team     | Sample Size |
+|----------------|-----------------------|----------|-------------|
+| Bottas         | 2018,2019,2020,& 2021 | Mercedes | 80          |
+| Vettel         | 2018,2019,& 2020      | Ferrari  | 60          |
+| Max Verstappen | 2018,2019,2020,& 2021 | Red Bull | 80          |
+| Hamilton       | 2018,2019,2020,& 2021 | Mercedes | 80          |
+
++:----------------------------------------------------------------------+
+| ## TEAMS                                                              |
++-----------------------------------------------------------------------+
+| \| Team \| Years \| Individual \| Sample Size (Train, Test) \|        |
+| \|----------\|-------                                                 |
+| -----------------\|-------------------\|---------------------------\| |
+| \| Ferrari \| 2018,2019,2020, & 2021 \| Leclerc & Vettel \| 78        |
+| (80%,20%) \| \| Mercedes \| 2018,2019,2020, & 2021 \| Bottas &        |
+| Hamilton \| 162 (70%,30%) \|                                          |
++-----------------------------------------------------------------------+
+| ##\# Insights (Teams):                                                |
++-----------------------------------------------------------------------+
+| The most notable insight between Ferrari and Mercedes is the Variable |
+| Importance of Driver Reference. On Mercedes the most valuable node is |
+| if the Driver is Lewis Hamilton or not. Secondly, we see that this is |
+| a positive coefficient from our Logit model with a high P-value       |
+| represented by the \*\*\*. On the other hand, Driver Reference for    |
+| Ferrari had the lowest Variable Importance and while did not show any |
+| significance in our Ferrari W/L Logit model coefficient graph, it did |
+| have a pvalue of .1082 with 97 degrees of freedom. What this          |
+| indicates is that when the "car" is accounted for Lewis Hamilton is   |
+| showing why he is paid the highest amount in the league.Driver Ref == |
+| "Hamilton" had less than a .005 pvalue with 113 degrees of freedom.   |
+| No other variable had a significance level less than .12.             |
++-----------------------------------------------------------------------+
+| Another Insight considered, was the higher Variable Importance of     |
+| environmental factors (Wind Speed, Track Temp, Weather) on the        |
+| Ferrari team. As these environmental factors increase we see a        |
+| negative correlation within our Ferrari Logit Coefficients. A deeper  |
+| analysis shows that the Logit P-Values for Ferrari were (Wind Speed : |
+| .93, Track Temp: .53, & Rained : .99). In other words... there may be |
+| some value discovered by the Random Forest Variable Importance, but   |
+| without more data these coefficients are unreliable.                  |
++-----------------------------------------------------------------------+
+
+## INDIVIDUALS
+
+| Individual     | Years                  | Team     | Sample Size  |
+|----------------|------------------------|----------|--------------|
+| Bottas         | 2018,2019,2020, & 2021 | Mercedes | 78 (83%,17%) |
+| Max Verstappen | 2018,2019,2020, & 2021 | Red Bull | 69 (70%,30%) |
+| Hamilton       | 2018,2019,2020, & 2021 | Mercedes | 84 (75%,25%) |
+
+### Insights (Individuals):
+
+One notable insight from our individual racer models is the Importance
+of Team Rank for Hamilton and lack there of for Bottas. Keep in mind
+these two racers have been on the same team for the last four years.
+With that said, it might be plausible that the Team Rank variable (How
+well the "car" qualified) would indicate similar Importance for the two.
+If the overall Qualifying rank for the team is lower, insinuating a
+better environmental fit for the Mercedes car, then both Bottas &
+Hamilton might see a positive correlation. However, this isn't true for
+Bottas. This could be a further indication of Lewis Hamilton's ability
+to overcome environmental factors and only have the machine and himself
+to account for any mistakes. Secondly, Grid has very rarely been outside
+of the #1 Variable Importance factor. In further examination of the
+Lewis Hamilton Logit model, the p-value for "Grid" is .59. After doing a
+StepAIC() analysis the only remaining coefficient is Team_Rank and Gris
+is removed. Lewis Hamilton is showing that even when he falls lower in
+the Grid ranking position there is no significance in his ability to
+secure the Win. For further validation on this, the only coefficient
+with a significant P-Value for Bottas is the Grid at a p-value of 0.034.
+
+### Purpose 2 Conclusion:
+
+Each driver and each team have different Variable Importance factors and
+correlation. It can be difficult to dive further into this with such
+small sample sizes, and we aren't following the best practices for
+either model. We used the two different models to piece together an
+understanding of the factors that effect drivers/teams. That being said
+we were able to make some considerable correlations that we can be
+confident in. Lewis Hamilton is showing the ability to be beyond
+environmental factors, and even the strongest factor for any other
+driver... the starting position. Where other teams have very little
+difference between drivers, indicating a potential strength of the car,
+Mercedes winning a race is highly correlated with that driver being
+Lewis Hamilton. Another interesting item to note, is that Bottas had 8
+wins himself. The true difference is that Hamilton had 47 alone. I'll
+leave you with the final answer. Is Lewis Hamilton worth \$30 million?
+
+### Overall Project Challenges/Experiments
+
+As stated in the previous section (Data Assumptions) above; the data
+lends itself to a lot of variables where there is influence with each
+other. We attempted to view these as systems of variables rather than
+specific factors and also tried to normalize estimates as much as
+possible. We categorized a car's performance only based on the pure pace
+it can achieve in one lap based on two drivers. However, a car's
+performance throughout a race weekend has many more factors such as
+reliability, tire degradation, differences between driving behind cars
+and having clear space.
+
+Data wrangling did take a majority of the time and to prepare our data
+for modeling. We experimented with numerous different variables such as
+track speed, relative finishing positions (1-8), team rank (instead of %
+of qualifying times), track ids, throttle response, and braking
+response. All of these variables were eliminated primarily due to not
+having a large influence in our models or have compounding effects on
+each other. The variables used in our model was distilled at an attempt
+to have as much independence as possible.
+
+### Future Steps
+
+The dataset from Kaggle and the use of the Ergast API is very rich and
+we simply did not have time to fully explore each and every piece. In
+reality, a race has multitudes of factors such as collisions causing
+safety cars, incidents such as punctures, team strategies such as number
+of pit stops and tire selection, car reliability, etc. As our own team,
+we hope to continue to build on this project to
+
+Appendix
+
+```{r eval=FALSE}
+
+#### PURPOSE 1 MODELING CODE
+
+library(randomForest)
+library(caret)
+library(lime)
+library(tree)
+library(pROC)
+library(car)
+library(MASS)
+library(xgboost)
+
+install.packages(randomForest)
+
+# Importing Data and Prepping it for modeling
+mydata_all <- read.csv('Model_Data_w_Turns.csv')
+#str(mydata)
+mydata_win <- subset(mydata_all, select= c(dist.mi,grid,position,
+                                           Air.Temp,Track.Temp,Wind.Speed,
+                                           driverRef,constructorRef,Rainfall2,
+                                           qualifying_dif,team_rank,dist_turns,
+                                           dist_s_turns,turns_mile,turns_s_mile,
+                                           Turns,Sharp.Turns,Type))
+
+mydata_top6 <- subset(mydata_all, select= c(dist.mi,grid,position,Air.Temp,Track.Temp,
+                                            Wind.Speed,driverRef,constructorRef,
+                                            Rainfall2,qualifying_dif,team_rank,
+                                            dist_turns,dist_s_turns,turns_mile,
+                                            turns_s_mile,Turns,Sharp.Turns,Type))
+
+mydata_top3 <- subset(mydata_all, select= c(dist.mi,grid,position,Air.Temp,Track.Temp,
+                                            Wind.Speed,driverRef,constructorRef,Rainfall2,
+                                            qualifying_dif,team_rank,dist_turns,dist_s_turns,
+                                            turns_mile,turns_s_mile,Turns,Sharp.Turns,Type))
+
+mydata_top6$finish_tier[mydata_top6$position<=6] <-'Top6'
+mydata_top6$finish_tier[(mydata_top6$position>6)] <- 'Back_Marker'
+
+mydata_top3$finish_tier[mydata_top3$position<=3] <-'Podium'
+mydata_top3$finish_tier[(mydata_top3$position>3)] <- 'Back_Marker'
+
+
+mydata_top6 <- na.omit(mydata_top6)
+mydata_top3 <- na.omit(mydata_top3)
+mydata_win <- na.omit(mydata_win)
+
+
+mydata_win$win[mydata_win$position ==1] <- 'Win'
+mydata_win$win[mydata_win$position !=1] <- 'Lose'
+
+
+#################### Data Cleaning and dropping columns ###############################
+
+model_data_win <- subset(mydata_win, select = -c(turns_mile,turns_s_mile,Turns,
+                                                 dist_turns,Sharp.Turns,position,
+                                                 constructorRef,team_rank))
+#str(model_data_win)
+factor_cols_win <- c('Rainfall2','driverRef','win','Type')
+model_data_win[,factor_cols_win] <- lapply(model_data_win[,factor_cols_win],factor)
+
+model_data_top6 <- subset(mydata_top6, select = -c(turns_mile,turns_s_mile,Turns,
+                                                   dist_turns,Sharp.Turns,
+                                                   position,constructorRef,team_rank))
+#str(model_data_top5)
+factor_cols_top6 <- c('Rainfall2','driverRef','finish_tier','Type')
+model_data_top6[,factor_cols_top6] <- lapply(model_data_top6[,factor_cols_top6],factor)
+
+model_data_top3 <- subset(mydata_top3, select = -c(turns_mile,turns_s_mile,Turns,
+                                                   dist_turns,Sharp.Turns,position,
+                                                   constructorRef,team_rank))
+#str(model_data_top3)
+factor_cols_top3 <- c('Rainfall2','driverRef','finish_tier','Type')
+model_data_top3[,factor_cols_top3] <- lapply(model_data_top3[,factor_cols_top3],factor)
+
+
+########### Win Lose Model ##############################################
+# Training and Testing for Win Lose Model
+#str(model_data_win)
+set.seed(24)
+ind <- sample(2, nrow(model_data_win), replace=T, prob=c(0.6,0.4))
+train_win <- model_data_win[ind==1,]
+test_win <- model_data_win[ind==2,]
+
+############# logistic regression model for Win-Lose
+log_win <- glm(win~., data=train_win, family='binomial')
+
+# create prediction based on test
+log_win_predict <- predict(log_win, test_win,type='response')
+
+# ROC Curve for logistic model
+rlog <- multiclass.roc(test_win$win,log_win_predict, percent=TRUE)
+roc_log <- rlog[['rocs']]
+r_log<-roc_log[[1]]
+plot.roc(r_log,
+         print.auc = T,
+         auc.polygon = T,
+         max.auc.polygon = T,
+         auc.polygon.col ='lightblue',
+         print.thres = T,
+         main = 'ROC Curve for Logistic (Win)')
+
+log_win_predict_f<- as.factor(ifelse(log_win_predict_r>0.1,'Win','Lose'))
+confusionMatrix(log_win_predict_f, test_win$win, positive='Win')
+
+# creating pareto chart of total wins (for report)
+win_data <- mydata_win %>% 
+  group_by(driverRef) %>% 
+  mutate(win_total = sum(win =='Win'))
+
+driver_win <- unique(win_data[,c('driverRef','win_total')]) %>% arrange((win_total))
+driver_win$driverRef <- gsub('max_verstappen','max',driver_win$driverRef)
+driver_win$driverRef <- gsub('raikkonen','rai',driver_win$driverRef)
+driver_win$highlight <- 'no'
+driver_win[6,'highlight'] <- 'yes'
+driver_win[3,'highlight'] <- 'yes'
+
+driver_win <- arrange(driver_win,win_total)
+driver_win$driverRef <- factor(driver_win$driverRef, levels=driver_win$driverRef)
+win_pareto <-ggplot(driver_win, aes(x=driverRef,y=win_total, fill=highlight)) +
+  geom_col() +coord_flip() + 
+  theme(legend.position='none', plot.title = element_text(hjust = 0.5))+
+  scale_fill_manual(values=c('grey69','tomato1')) +
+  ggtitle('Wins by Driver') +
+  xlab('Driver Name') +
+  ylab('Total Wins (2018-2021)')
+
+win_pareto
+
+######### Forest Model for Win-Lose
+cvcontrol <- trainControl(method ='repeatedcv',
+                          number =5,
+                          repeats=2,
+                          allowParallel = TRUE)
+forest_win <- train(win ~.,
+                    data=train_win,
+                    method='rf',
+                    trControl = cvcontrol,
+                    importance=TRUE,ntree=400)
+
+# Create initial probability predictions based on test
+forest_win_pred <- predict(forest_win, test_win, type='prob')
+# ROC curve for random forest
+rforest <- multiclass.roc(test_win$win,forest_win_pred$Win, percent=TRUE)
+roc_forest <- rforest[['rocs']]
+r_forest <-roc_forest[[1]]
+plot.roc(r_forest,
+         col = 'red',
+         print.auc = T,
+         auc.polygon = T,
+         max.auc.polygon = T,
+         auc.polygon.col ='lightgoldenrod',
+         print.thres = T,
+         main = 'ROC Curve for Forest')
+
+coords(r_boost,"best", ret='threshold',transpose=FALSE)
+
+# Prediction using ROC threshold
+forest_win_factor <- as.factor(ifelse(forest_win_pred$Win>0.1,"Win","Lose"))
+
+# Confusion Matrix 
+confusionMatrix(forest_win_factor, test_win$win, positive='Win')
+plot(varImp(forest_win), main='Variable Importance for Race Win (Forest Model)')
+
+######### Boost Model for Win-Lose
+cvcontrol <- trainControl(method ='repeatedcv',
+                          number =5,
+                          repeats=2,
+                          allowParallel = TRUE)
+boost_win<- train(win ~., 
+                  data = train_win,
+                  method='xgbTree',
+                  trControl = cvcontrol,
+                  tuneGrid = expand.grid(nrounds = 50,
+                                         max_depth = 3,
+                                         eta = .1,
+                                         gamma = 2,
+                                         colsample_bytree =1,
+                                         min_child_weight = 1,
+                                         subsample =1 ))
+# Prediction using test 
+boost_win_pred <- predict(boost_win, test_win, type='prob')
+# ROC Curve
+rboost <- multiclass.roc(test_win$win,boost_win_pred$Win, percent=TRUE)
+roc_boost <- rboost[['rocs']]
+r_boost <-roc_boost[[1]]
+plot.roc(r_boost,
+         print.auc = T,
+         print.auc.cex=1.1,
+         auc.polygon = T,
+         max.auc.polygon = T,
+         auc.polygon.col ='Tomato',
+         #show.thres = T,
+         print.thres = T,
+         print.thres.cex=1.05,
+         main = 'ROC Curve for Boost (Win)')
+
+boost_win_factor <- as.factor(ifelse(boost_win_pred$Win>0.05,"Win","Lose"))
+
+confusionMatrix(boost_win_factor, test_win$win, positive='Win')
+
+# Finding the best threshold
+coords(r_boost,"best", ret='threshold',transpose=FALSE)
+# coords(r_forest,"best", ret='threshold',transpose=FALSE)
+# coords(r_log,"best", ret='threshold',transpose=FALSE)
+
+plot(boostwin_depth, main = 'Max tree depth vs CV-Accuracy')
+
+# plotting ROC curves for all
+par(mfrow=c(2,2))
+#par(mar= c(4,4,4,4)+.1)
+plot.roc(r_log,
+         print.auc = T,
+         print.auc.cex=1.1,
+         auc.polygon = T,
+         max.auc.polygon = T,
+         auc.polygon.col ='lightblue',
+         print.thres = T,
+         print.thres.cex=1.05,
+         main = 'ROC Curve for Logistic (Win)')
+plot.roc(r_forest,
+         print.auc = T,
+         print.auc.cex=1.1,
+         auc.polygon = T,
+         max.auc.polygon = T,
+         auc.polygon.col ='lightgoldenrod',
+         print.thres = T,
+         print.thres.cex=1.05,
+         main = 'ROC Curve for Forest (Win)')
+plot.roc(r_boost,
+         print.auc = T,
+         print.auc.cex=1.1,
+         auc.polygon = T,
+         max.auc.polygon = T,
+         auc.polygon.col ='Tomato',
+         print.thres = T,
+         print.thres.cex=1.05,
+         main = 'ROC Curve for Boost (Win)')
+
+##################### Models used for Analysis in Win Lose
+# StepAIC for logistic regression model
+stepAIC(log_win)
+
+## Logistic Reduced Model (Explanation in Report)
+log_win_grid <- glm(win~grid+driverRef, data= train_win, family='binomial')
+log_win_g_pred <- as.factor(ifelse(predict(log_win_grid, test_win, type='response')>0.1,
+                                   'Win','Lose'))
+confusionMatrix(log_win_g_pred, test_win$win, positive='Win')
+
+## Forest Model for Explaining Loss
+f_win_reduced <- train(win ~ driverRef + grid + Rainfall2 + qualifying_dif,
+                       data=train_win,
+                       method='rf',
+                       trControl = cvcontrol,
+                       importance=TRUE,ntree=400)
+f_win_reduced_pred <- predict(f_win_reduced, test_win, type='prob')
+f_win_reduced_factor <- as.factor(ifelse(f_win_reduced_pred$Win>0.1,"Win","Lose"))
+
+confusionMatrix(f_win_reduced_factor, test_win$win, positive='Win')
+plot(varImp(f_win_reduced), main='Variable Importance for Race Win (Forest Model)')
+########################### PODIUM FINISH ANALYSIS ###########
+# Sampling and Training for Podium Models
+str(model_data_top3)
+set.seed(24)
+ind <- sample(2, nrow(model_data_top3), replace=T, prob=c(0.6,0.4))
+train_pod <- model_data_top3[ind==1,]
+test_pod <- model_data_top3[ind==2,]
+
+# Logistic Regression Podium
+log_pod <- glm(finish_tier~., data=test_pod, family='binomial')
+
+# Creating ROC Curve of Logistic
+log_pod_predict <- predict(log_pod, test_pod,type='response')
+rlog_pod <- multiclass.roc(test_pod$finish_tier,log_pod_predict, percent=TRUE)
+roc_log_pod <- rlog_pod[['rocs']]
+r_log_pod<-roc_log_pod[[1]]
+plot.roc(r_log_pod,
+         print.auc = T,
+         auc.polygon = T,
+         max.auc.polygon = T,
+         auc.polygon.col ='lightblue',
+         print.thres = T,
+         main = 'ROC Curve for Logistic (Podium)')
+
+# Predicting with Threshold
+log_pod_predict_f<- as.factor(ifelse(log_pod_predict>0.2,'Podium','Back_Marker'))
+# Confusion Matrix
+confusionMatrix(log_pod_predict_f, test_pod$finish_tier, positive='Podium')
+
+# Forest Model Podium
+cvcontrol <- trainControl(method ='repeatedcv',
+                          number =5,
+                          repeats=2,
+                          allowParallel = TRUE)
+
+f_pod <- train(finish_tier ~.,
+               data=train_pod,
+               method='rf',
+               trControl = cvcontrol,
+               importance=TRUE,ntree=400)
+
+# ROC Curve 
+f_pod_pred <- predict(f_pod,test_pod, type='prob')
+rf_pod <- multiclass.roc(test_pod$finish_tier,f_pod_pred$Podium, percent=TRUE)
+roc_f_pod <- rf_pod[['rocs']]
+r_f_pod <-roc_f_pod[[1]]
+plot.roc(r_f_pod,
+         print.auc = T,
+         auc.polygon = T,
+         max.auc.polygon = T,
+         auc.polygon.col ='lightgoldenrod',
+         print.thres = T,
+         main = 'ROC Curve for Forest (Podium)')
+
+
+# Forest Prediction with Threshold
+f_pod_predict_f<- as.factor(ifelse(f_pod_pred$Podium>0.2,'Podium','Back_Marker'))
+# Confusion Matrix
+confusionMatrix(f_pod_predict_f, test_pod$finish_tier, positive='Podium')
+
+plot(varImp(f_pod))
+# Boost Model
+cvcontrol <- trainControl(method ='repeatedcv',
+                          number =5,
+                          repeats=2,
+                          allowParallel = TRUE)
+
+b_pod <- train(finish_tier ~., 
+               data = train_pod,
+               method='xgbTree',
+               trControl = cvcontrol,
+               tuneGrid = expand.grid(nrounds = 100,
+                                      max_depth =3,
+                                      eta = 0.1,
+                                      gamma = 0,
+                                      colsample_bytree =1,
+                                      min_child_weight = 1,
+                                      subsample =1 ))
+
+plot(b_pod, main='Different Gamma Function Podium Boost Model')
+
+# ROC Curve 
+b_pod_pred <- predict(b_pod,test_pod, type='prob')
+rb_pod <- multiclass.roc(test_pod$finish_tier,b_pod_pred$Podium, percent=TRUE)
+roc_b_pod <- rb_pod[['rocs']]
+r_b_pod <-roc_b_pod[[1]]
+plot.roc(r_b_pod,
+         print.auc = T,
+         auc.polygon = T,
+         max.auc.polygon = T,
+         auc.polygon.col ='Tomato',
+         print.thres = T,
+         main = 'ROC Curve for Boost (Podium)')
+
+# Confusion Matrix
+b_pod_predict_f<- as.factor(ifelse(b_pod_pred$Podium>0.1,'Podium','Back_Marker'))
+confusionMatrix(b_pod_predict_f, test_pod$finish_tier, positive='Podium')
+
+
+# creating pareto chart of podiums (for report)
+pod_data <- mydata_top3 %>% 
+  group_by(driverRef) %>% 
+  mutate(pod_total = sum(finish_tier =='Podium'), race_total = n())
+
+driver_pod <- unique(pod_data[,c('driverRef','pod_total','race_total')]) %>% 
+  arrange((pod_total))
+driver_pod$driverRef <- gsub('max_verstappen','max',driver_win$driverRef)
+driver_pod$driverRef <- gsub('raikkonen','rai',driver_win$driverRef)
+driver_pod$highlight <- 'no'
+driver_pod[5,'highlight'] <- 'yes'
+driver_pod[3,'highlight'] <- 'yes'
+driver_pod[,'highlight'] <- 'yes'
+
+driver_pod$pod_percent <- (driver_pod$pod_total/driver_pod$race_total)*100
+
+
+par(mfrow=c(1,1))
+driver_pod <- arrange(driver_pod,pod_total)
+driver_pod$driverRef <- factor(driver_pod$driverRef, levels=driver_pod$driverRef)
+pod_pareto <-ggplot(driver_pod, aes(x=driverRef,y=pod_total, fill=highlight)) +
+  geom_col() +coord_flip() + 
+  theme(legend.position='none', plot.title = element_text(hjust = 0.5))+
+  scale_fill_manual(values=c('grey69','tomato1')) +
+  ggtitle('Podiums by Driver') +
+  xlab('Driver Name') +
+  ylab('Total Podiums (2018-2021)')
+
+pod_pareto
+
+
+#### Models Used for Explanation
+
+plot(varImp(f_pod))
+
+f_pod_reduced <- train(finish_tier ~grid + qualifying_dif + driverRef + Type +dist.mi,
+                       data=train_pod,
+                       method='rf',
+                       trControl = cvcontrol,
+                       importance=TRUE,ntree=400)
+
+
+# ROC Curve and Confusion Matrix
+f_pod_reduced_pred <- predict(f_pod_reduced,test_pod, type='prob')
+rf_pod_reduced <- multiclass.roc(test_pod$finish_tier,f_pod_reduced_pred$Podium, 
+                                 percent=TRUE)
+roc_f_pod_reduced <- rf_pod_reduced[['rocs']]
+r_f_pod_reduced <-roc_f_pod_reduced[[1]]
+plot.roc(r_f_pod_reduced,
+         print.auc = T,
+         auc.polygon = T,
+         max.auc.polygon = T,
+         auc.polygon.col ='lightgoldenrod',
+         print.thres = T,
+         main = 'ROC Curve for Reduced Forest (Podium)')
+
+f_pod_reduced_factor <- as.factor(ifelse(f_pod_reduced_pred$Podium>0.2,
+                                         "Podium","Back_Marker"))
+
+confusionMatrix(f_pod_reduced_factor, test_pod$finish_tier, positive='Podium')
+
+plot(varImp(f_pod_reduced), main='Variable Importance for Podium (Forest Model)') 
+
+log_pod_final <- glm(finish_tier ~ grid + driverRef + qualifying_dif, 
+                     data=test_pod, family='binomial')
+log_pod_final_pred <- predict(log_pod_final, test_pod,type='response')
+rlog_pod_final <- multiclass.roc(test_pod$finish_tier,log_pod_final_pred, percent=TRUE)
+roc_log_pod_final <- rlog_pod_final[['rocs']]
+r_log_pod_final <-roc_log_pod_final[[1]]
+plot.roc(r_log_pod_final,
+         print.auc = T,
+         auc.polygon = T,
+         max.auc.polygon = T,
+         auc.polygon.col ='lightblue',
+         print.thres = T,
+         main = 'ROC Curve for Logistic-Reduced (Podium)')
+
+log_pod_final
+
+# ROC Curves for Report
+par(mfrow=(c(2,2)))
+plot.roc(r_log_pod,
+         print.auc = T,
+         print.auc.cex = 1.1,
+         auc.polygon = T,
+         max.auc.polygon = T,
+         auc.polygon.col ='lightblue',
+         print.thres = T,
+         print.thres.cex=1.05,
+         main = 'ROC Curve for Logistic (Podium)')
+plot.roc(r_f_pod,
+         print.auc = T,
+         print.auc.cex = 1.1,
+         auc.polygon = T,
+         max.auc.polygon = T,
+         auc.polygon.col ='lightgoldenrod',
+         print.thres = T,
+         print.thres.cex = 1.05,
+         main = 'ROC Curve for Forest (Podium)')
+plot.roc(r_b_pod,
+         print.auc = T,
+         print.auc.cex =1.1,
+         auc.polygon = T,
+         max.auc.polygon = T,
+         auc.polygon.col ='Tomato',
+         print.thres = T,
+         print.thres.cex=1.05,
+         main = 'ROC Curve for Boost (Podium)')
+
+################################## TOP TEAM (1-6 analysis) ##########
+str(model_data_top6)
+set.seed(24)
+ind <- sample(2, nrow(model_data_top6), replace=T, prob=c(0.6,0.4))
+train_tm <- model_data_top6[ind==1,]
+test_tm <- model_data_top6[ind==2,]
+
+# Logistic Regression Podium
+log_tm <- glm(finish_tier~., data=test_tm, family='binomial')
+
+# Creating ROC Curve of Logistic
+log_tm_predict <- predict(log_tm, test_tm,type='response')
+rlog_tm <- multiclass.roc(test_tm$finish_tier,log_tm_predict, percent=TRUE)
+roc_log_tm <- rlog_tm[['rocs']]
+r_log_tm<-roc_log_tm[[1]]
+plot.roc(r_log_tm,
+         print.auc = T,
+         auc.polygon = T,
+         max.auc.polygon = T,
+         auc.polygon.col ='lightblue',
+         print.thres = T,
+         main = 'ROC Curve for Logistic (Top 6)')
+
+# Confusion Matrix
+log_tm_predict_f<- as.factor(ifelse(log_tm_predict>0.5,'Top6','Back_Marker'))
+confusionMatrix(log_tm_predict_f, test_tm$finish_tier, positive='Top6')
+
+# Forest Model Podium
+cvcontrol <- trainControl(method ='repeatedcv',
+                          number =5,
+                          repeats=2,
+                          allowParallel = TRUE)
+
+f_tm <- train(finish_tier ~.,
+              data=train_tm,
+              method='rf',
+              trControl = cvcontrol,
+              importance=TRUE,ntree=400)
+
+# ROC Curve 
+f_tm_pred <- predict(f_tm,test_tm, type='prob')
+rf_tm <- multiclass.roc(test_tm$finish_tier,f_tm_pred$Top6, percent=TRUE)
+roc_f_tm <- rf_tm[['rocs']]
+r_f_tm <-roc_f_tm[[1]]
+plot.roc(r_f_tm,
+         print.auc = T,
+         auc.polygon = T,
+         max.auc.polygon = T,
+         auc.polygon.col ='lightgoldenrod',
+         print.thres = T,
+         main = 'ROC Curve for Forest (Top 6)')
+
+plot(varImp(f_tm), main = 'Backmarker Model')
+
+# Confusion Matrix
+f_tm_predict_f<- as.factor(ifelse(f_tm_pred$Top6>0.6,'Top6','Back_Marker'))
+confusionMatrix(f_tm_predict_f, test_tm$finish_tier, positive='Top6')
+
+# Boost Model
+b_tm <- train(finish_tier ~., 
+              data = train_tm,
+              method='xgbTree',
+              trControl = cvcontrol,
+              tuneGrid = expand.grid(nrounds = 100,
+                                     max_depth =3,
+                                     eta = 0.1,
+                                     gamma = 0,
+                                     colsample_bytree =1,
+                                     min_child_weight = 1,
+                                     subsample =1 ))
+
+plot(b_pod, main='Different Gamma Function Podium Boost Model')
+
+# ROC Curve 
+b_tm_pred <- predict(b_tm,test_tm, type='prob')
+rb_tm <- multiclass.roc(test_tm$finish_tier,b_tm_pred$Top6, percent=TRUE)
+roc_b_tm <- rb_tm[['rocs']]
+r_b_tm <-roc_b_tm[[1]]
+plot.roc(r_b_tm,
+         print.auc = T,
+         auc.polygon = T,
+         max.auc.polygon = T,
+         auc.polygon.col ='Tomato',
+         print.thres = T,
+         main = 'ROC Curve for Boost (Top 6)')
+
+# Confusion Matrix
+b_tm_predict_f<- as.factor(ifelse(b_tm_pred$Top6>0.6,'Top6','Back_Marker'))
+confusionMatrix(b_tm_predict_f, test_tm$finish_tier, positive='Top6')
+
+
+# WINNING MODELS FOR Top6
+
+# Boost Model Top6 
+plot(varImp(b_tm), main='Not Reduced Important Variables', ylab='Variables')
+
+b_tm_rounds <- train(finish_tier ~ grid + qualifying_dif + Track.Temp + driverRef, 
+                     data = train_tm,
+                     method='xgbTree',
+                     trControl = cvcontrol,
+                     tuneGrid = expand.grid(nrounds = c(50,100,300,500,700,1600,
+                                                        3000,6000,10000,20000),
+                                            max_depth =3,
+                                            eta = 0.01,
+                                            gamma = 0,
+                                            colsample_bytree =1,
+                                            min_child_weight = 1,
+                                            subsample =1 ))
+
+b_tm_eta <- train(finish_tier ~ grid + qualifying_dif + Track.Temp + driverRef, 
+                  data = train_tm,
+                  method='xgbTree',
+                  trControl = cvcontrol,
+                  tuneGrid = expand.grid(nrounds = 1600,
+                                         max_depth =5,
+                                         eta = c(0.01,0.1,0.3),
+                                         gamma = 0,
+                                         colsample_bytree =1,
+                                         min_child_weight = 1,
+                                         subsample =1 ))
+
+b_tm_depth <- train(finish_tier ~ grid + qualifying_dif + Track.Temp + driverRef, 
+                    data = train_tm,
+                    method='xgbTree',
+                    trControl = cvcontrol,
+                    tuneGrid = expand.grid(nrounds = 1600,
+                                           max_depth =c(1,3,5,7,10),
+                                           eta = 0.1,
+                                           gamma = 0,
+                                           colsample_bytree =1,
+                                           min_child_weight = 1,
+                                           subsample =1 ))
+
+b_tm_gamma <- train(finish_tier ~ grid + qualifying_dif + Track.Temp + driverRef, 
+                    data = train_tm,
+                    method='xgbTree',
+                    trControl = cvcontrol,
+                    tuneGrid = expand.grid(nrounds = 1600,
+                                           max_depth =5,
+                                           eta = 0.1,
+                                           gamma = c(0,1,2,3),
+                                           colsample_bytree =1,
+                                           min_child_weight = 1,
+                                           subsample =1 ))
+
+b_tm_reduced<- train(finish_tier ~ grid + qualifying_dif + Track.Temp + driverRef, 
+                     data = train_tm,
+                     method='xgbTree',
+                     trControl = cvcontrol,
+                     tuneGrid = expand.grid(nrounds = 300,
+                                            max_depth =5,
+                                            eta = 0.1,
+                                            gamma = 1,
+                                            colsample_bytree =1,
+                                            min_child_weight = 1,
+                                            subsample =1 ))
+
+par(mfrow=(c(2,2)))
+
+library(DiagrammeR)
+xgb.plot.tree(model=b_tm$finalModel, trees=50)
+xgb.plot.tree(model=b_tm$finalModel, trees=1)
+
+plot(varImp(b_tm), main='Variable Importance for Boost Model (Top 6)')
+
+
+# ROC Curve and Confusion Matrix
+b_tm_reduced_pred <- predict(b_tm_reduced,test_tm, type='prob')
+rb_tm_reduced <- multiclass.roc(test_tm$finish_tier,b_tm_reduced_pred$Top6, percent=TRUE)
+rocb_tm_reduced <- rb_tm_reduced[['rocs']]
+r_b_tm_reduced <-rocb_tm_reduced[[1]]
+plot.roc(r_b_tm_reduced,
+         print.auc = T,
+         auc.polygon = T,
+         max.auc.polygon = T,
+         auc.polygon.col ='lightgoldenrod',
+         print.thres = T,
+         main = 'ROC Curve for Boost (Top6)')
+
+b_tm_reduced_factor <- as.factor(ifelse(b_tm_reduced_pred$Top6>0.7,"Top6","Back_Marker"))
+
+confusionMatrix(b_tm_reduced_factor, test_tm$finish_tier, positive='Top6')
+
+log_pod_final_pred_f<- as.factor(ifelse(log_pod_final_pred>0.3,'Podium','Back_Marker'))
+confusionMatrix(log_pod_final_pred_f, test_pod$finish_tier, positive='Podium')
+
+# creating pareto chart of podiums (for report)
+pod_data <- mydata_top3 %>% 
+  group_by(driverRef) %>% 
+  mutate(pod_total = sum(finish_tier =='Podium'), race_total = n())
+
+driver_pod <- unique(pod_data[,c('driverRef','pod_total','race_total')]) %>% 
+  arrange((pod_total))
+driver_pod$driverRef <- gsub('max_verstappen','max',driver_win$driverRef)
+driver_pod$driverRef <- gsub('raikkonen','rai',driver_win$driverRef)
+driver_pod$highlight <- 'no'
+driver_pod[6,'highlight'] <- 'yes'
+driver_pod[3,'highlight'] <- 'yes'
+
+driver_pod$pod_percent <- (driver_pod$pod_total/driver_pod$race_total)*100
+
+
+par(mfrow=c(1,1))
+driver_pod <- arrange(driver_pod,pod_total)
+driver_pod$driverRef <- factor(driver_pod$driverRef, levels=driver_pod$driverRef)
+pod_pareto <-ggplot(driver_pod, aes(x=driverRef,y=pod_total, fill=highlight)) +
+  geom_col() +coord_flip() + 
+  theme(legend.position='none', plot.title = element_text(hjust = 0.5))+
+  scale_fill_manual(values=c('grey69','tomato1')) +
+  ggtitle('Podiums by Driver') +
+  xlab('Driver Name') +
+  ylab('Total Podiums (2018-2021)')
+
+pod_pareto
+
+# Podium Loss Model
+plot(varImp(f_pod))
+
+f_pod_reduced <- train(finish_tier ~grid + qualifying_dif + driverRef,
+                       data=train_pod,
+                       method='rf',
+                       trControl = cvcontrol,
+                       importance=TRUE,ntree=400)
+
+# ROC Curve and Confusion Matrix
+f_pod_reduced_pred <- predict(f_pod_reduced,test_pod, type='prob')
+rf_pod_reduced <- multiclass.roc(test_pod$finish_tier,f_pod_reduced_pred$Podium, percent=TRUE)
+roc_f_pod_reduced <- rf_pod_reduced[['rocs']]
+r_f_pod_reduced <-roc_f_pod_reduced[[1]]
+plot.roc(r_f_pod_reduced,
+         print.auc = T,
+         auc.polygon = T,
+         max.auc.polygon = T,
+         auc.polygon.col ='lightgoldenrod',
+         print.thres = T,
+         main = 'ROC Curve for Reduced Forest (Podium)')
+
+f_pod_reduced_factor <- as.factor(ifelse(f_pod_reduced_pred$Podium>0.4,"Podium",
+                                         "Back_Marker"))
+
+confusionMatrix(f_pod_reduced_factor, test_pod$finish_tier, positive='Podium')
+
+plot(varImp(f_pod_reduced), main='Variable Importance for Podium (Forest Model)') 
+
+# ROC Curves for Report
+par(mfrow=(c(2,2)))
+plot.roc(r_log_tm,
+         print.auc = T,
+         print.auc.cex=1.1,
+         auc.polygon = T,
+         max.auc.polygon = T,
+         auc.polygon.col ='lightblue',
+         print.thres = T,
+         print.thres.cex=1.05,
+         main = 'ROC Curve for Logistic (Top 6)')
+plot.roc(r_f_tm,
+         print.auc = T,
+         print.auc.cex=1.1,
+         auc.polygon = T,
+         max.auc.polygon = T,
+         auc.polygon.col ='lightgoldenrod',
+         print.thres = T,
+         print.thres.cex =1.05,
+         main = 'ROC Curve for Forest (Top 6)')
+plot.roc(r_b_tm,
+         print.auc = T,
+         print.auc.cex =1.1,
+         auc.polygon = T,
+         max.auc.polygon = T,
+         auc.polygon.col ='Tomato',
+         print.thres = T,
+         print.thres.cex=1.05,
+         main = 'ROC Curve for Boost (Top 6)')
+
+
+
+str(model_data_top6)
+set.seed(24)
+ind <- sample(2, nrow(model_data_top6), replace=T, prob=c(0.6,0.4))
+train <- model_data_top3[ind==1,]
+test <- model_data_top3[ind==2,]
+
+cvcontrol <- trainControl(method ='repeatedcv',
+                          number =5,
+                          repeats=2,
+                          allowParallel = TRUE)
+
+forest3 <- train(finish_tier ~.,
+                 data=train,
+                 method='rf',
+                 trControl = cvcontrol,
+                 importance=TRUE,ntree=400)
+
+# ROC Curve 
+f3_predict <- predict(forest3,test, type='prob')
+r <- multiclass.roc(test$finish_tier,f3_predict$Podium, percent=TRUE)
+roc <- r[['rocs']]
+r1 <-roc[[1]]
+#plot.roc(r1, col='red',lwd=3, main= 'ROC Curve for Forest 3 (Podium)')
+plot.roc(r1,
+         print.auc = T,
+         auc.polygon = T,
+         max.auc.polygon = T,
+         auc.polygon.col ='lightblue',
+         print.thres = T,
+         main = 'ROC Curve for Forest 3 (Top 5 Finish)')
+
+
+
+boost3 <- train(finish_tier ~., 
+                data = train,
+                method='xgbTree',
+                trControl = cvcontrol,
+                tuneGrid = expand.grid(nrounds = 1000,
+                                       max_depth =5,
+                                       eta = 0.3,
+                                       gamma = 2,
+                                       colsample_bytree =1,
+                                       min_child_weight = 1,
+                                       subsample =1 ))
+
+```
