@@ -416,7 +416,7 @@ As a result, the original gradient model was used to explain the top 6
 finishes.
 
 ![Variable Importance for Top 6
-Model](Figures/Backmarker%20Model%20Imp.jpeg){width="3.8in"}
+Model](Figures/Backmarker%20Model%20Imp.jpeg){width="3.49in"}
 
 Based on the variable importance on the XgBoost model, the most
 important root node was grid, car performance, and track temperature.
@@ -431,7 +431,8 @@ environmental variables become slightly more important than the previous
 podium and race-win models.
 
 ![Example of XgBoost
-Tree](Figures/Example%20Decision%20Tree.jpeg){width="5in"}
+Tree](Figures/Example%20Decision%20Tree.jpeg){width="4.5in"
+height="5in"}
 
 In fact, when looking at an example tree diagram from the model, it
 appears that having grids at 6 or below was crucial. This may be obvious
